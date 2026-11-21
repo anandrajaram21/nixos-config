@@ -48,11 +48,13 @@
   users.users.altf4 = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
+    shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"
     ];
   };
   security.sudo.wheelNeedsPassword = true;
+  programs.fish.enable = true;
 
   services.openssh = {
     enable = true;
