@@ -5,9 +5,10 @@ layout and everyday commands.
 
 ## What this is
 
-A NixOS flake for one host, `saturn` (a headless home server), with Home
-Manager as a NixOS module and disko for partitioning. Inputs track
-`nixos-unstable`, and `flake.lock` pins them.
+A NixOS flake, currently with one host, `saturn` (a headless home server),
+with Home Manager as a NixOS module and disko for partitioning. Shared
+settings are split out so more hosts (including a nix-darwin Mac) can be
+added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
 
 ## Hard rules
 
@@ -25,16 +26,20 @@ Manager as a NixOS module and disko for partitioning. Inputs track
 - **No secrets in Nix files.** Everything in the config ends up in the
   world-readable `/nix/store`. Set passwords imperatively (`passwd`). Public
   SSH keys are fine.
-- **Don't change `system.stateVersion` or `home.stateVersion`** (`26.05`).
-  They record the install release, not the running version.
+- **Don't change `system.stateVersion` or `home.stateVersion`** (`26.05` on
+  saturn). They record the install release, not the running version.
 
 ## Working on the config
 
 - Flakes only see git-tracked files. `git add` new files before evaluating or
   building, or you'll get "path does not exist".
-- Keep host-specific settings in `hosts/saturn/`, user-level settings in
-  `home/home.nix`, and new features in their own module file, imported from
-  the host's `imports` (see `nvidia.nix`).
+- Shared settings go in `modules/common.nix` (system) and `home/common.nix`
+  (user). Keep `modules/common.nix` to options that also exist in nix-darwin.
+- Host-specific settings, system and Home Manager, go in `hosts/<host>/`. New
+  features go in their own module file, imported from the host's `imports`
+  (see `nvidia.nix`).
+- Check every host still evaluates after a change, e.g.
+  `nix eval .#nixosConfigurations.saturn.config.system.build.toplevel.drvPath`.
 - Match the existing style: two-space indent and minimal comments. Comment
   only safety warnings and non-obvious hardware workarounds, in one line.
 - `hardware-configuration.nix` is generated with `--no-filesystems`, because

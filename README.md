@@ -5,7 +5,8 @@
 Declarative NixOS configuration for **saturn**, a home server, built with
 [flakes](https://nixos.wiki/wiki/Flakes),
 [Home Manager](https://github.com/nix-community/home-manager) and
-[disko](https://github.com/nix-community/disko).
+[disko](https://github.com/nix-community/disko). Shared settings live in
+`common.nix` files so more hosts can be added.
 
 ## Layout
 
@@ -13,15 +14,23 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 .
 ├── flake.nix                          # inputs + nixosConfigurations.saturn
 ├── flake.lock                         # pinned input revisions
+├── modules/
+│   └── common.nix                     # system settings shared by every host
 ├── home/
-│   └── home.nix                       # Home Manager config for altf4
+│   └── common.nix                     # Home Manager config for altf4 shared by every host
 └── hosts/
     └── saturn/
         ├── configuration.nix          # system config (boot, network, users, SSH, mounts)
+        ├── home.nix                   # Home Manager config for altf4 on saturn
         ├── hardware-configuration.nix # generated with --no-filesystems
         ├── disko.nix                  # SSD partition layout (also generates fileSystems)
         └── nvidia.nix                 # NVIDIA driver module
 ```
+
+Everything specific to a host lives in `hosts/<host>/`. Its
+`configuration.nix` imports `modules/common.nix`, and its `home.nix` imports
+`home/common.nix`. Put a setting in a `common.nix`
+file when every host should have it, and in the host file otherwise.
 
 | Input | Tracks | Why |
 |---|---|---|
@@ -46,7 +55,7 @@ show on HDMI. The Linux console appears on HDMI once the kernel loads.
 
 ## Everyday use
 
-Run these on saturn from a clone of this repo:
+Run these on saturn from a clone of this repo (`~/nixos-config`):
 
 ```bash
 # Apply config changes
@@ -144,8 +153,15 @@ handles H.264/HEVC and uses far less power than the dGPU.
 
 ## Adding another host
 
-1. Create `hosts/<name>/` with its own `configuration.nix`,
-   `hardware-configuration.nix` (from `nixos-generate-config --no-filesystems`)
-   and `disko.nix` (point `device` at that machine's `/dev/disk/by-id/...`).
-2. Add `nixosConfigurations.<name>` in `flake.nix`.
-3. Pull shared settings into a common module once two hosts need them.
+1. Create `hosts/<name>/configuration.nix` that imports `../../modules/common.nix`.
+   For NixOS, add `hardware-configuration.nix` (from
+   `nixos-generate-config --no-filesystems`) and `disko.nix` (point `device`
+   at that machine's `/dev/disk/by-id/...`).
+2. Create `hosts/<name>/home.nix` that imports `../../home/common.nix` and sets
+   `home.stateVersion`.
+3. Add `nixosConfigurations.<name>` in `flake.nix`, using
+   `homeManagerFor ./hosts/<name>/home.nix`.
+
+For a Mac, add a `nix-darwin` input and a `darwinConfigurations.<name>` that
+uses `home-manager.darwinModules.home-manager`. `modules/common.nix` only uses
+options nix-darwin also has, so it can be imported there too.

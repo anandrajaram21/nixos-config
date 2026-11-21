@@ -1,9 +1,6 @@
 { pkgs, ... }:
 
 {
-  home.username = "altf4";
-  home.homeDirectory = "/home/altf4";
-
   home.packages = with pkgs; [
     ripgrep
     fd
@@ -25,6 +22,4 @@
     enable = true;
     nix-direnv.enable = true;
   };
-
-  home.stateVersion = "26.05";
 }
