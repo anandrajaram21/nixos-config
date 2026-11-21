@@ -58,8 +58,7 @@
     enable = true;
     settings = {
       PermitRootLogin = "no";
-      # Set to false once your SSH key is in authorizedKeys above.
-      PasswordAuthentication = true;
+      PasswordAuthentication = false;
     };
   };
 
