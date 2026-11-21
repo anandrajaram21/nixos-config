@@ -15,10 +15,10 @@
   };
 
   outputs = { nixpkgs, home-manager, disko, ... }: {
-    nixosConfigurations.homeserver = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.saturn = nixpkgs.lib.nixosSystem {
       modules = [
         disko.nixosModules.disko
-        ./hosts/homeserver/configuration.nix
+        ./hosts/saturn/configuration.nix
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

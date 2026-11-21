@@ -24,7 +24,7 @@
   hardware.enableRedistributableFirmware = true;
   zramSwap.enable = true;
 
-  networking.hostName = "homeserver";
+  networking.hostName = "saturn";
   networking.networkmanager.enable = true;
 
   time.timeZone = "Asia/Kolkata";
