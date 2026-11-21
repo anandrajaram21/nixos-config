@@ -44,7 +44,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
     openssh.authorizedKeys.keys = [
-      # "ssh-ed25519 AAAA... you@mac"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"
     ];
   };
   security.sudo.wheelNeedsPassword = true;
