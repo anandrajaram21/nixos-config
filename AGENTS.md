@@ -35,8 +35,8 @@ Manager as a NixOS module and disko for partitioning. Inputs track
 - Keep host-specific settings in `hosts/saturn/`, user-level settings in
   `home/home.nix`, and new features in their own module file, imported from
   the host's `imports` (see `nvidia.nix`).
-- Match the existing style: two-space indent, and short comments that say
-  *why* a setting exists, especially hardware workarounds.
+- Match the existing style: two-space indent and minimal comments. Comment
+  only safety warnings and non-obvious hardware workarounds, in one line.
 - `hardware-configuration.nix` is generated with `--no-filesystems`, because
   disko provides `fileSystems`. Don't add filesystem entries there.
 

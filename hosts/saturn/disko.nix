@@ -1,5 +1,4 @@
-# Declarative layout for the NVMe SSD. Running disko against this file ERASES the disk.
-# The NTFS data HDD is deliberately not listed here; it's mounted in configuration.nix.
+# Running disko against this file ERASES the disk. Never add the NTFS data HDD here.
 {
   disko.devices.disk.main = {
     type = "disk";

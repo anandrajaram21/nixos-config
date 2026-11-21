@@ -2,7 +2,6 @@
   description = "altf4's NixOS + Home Manager configuration";
 
   inputs = {
-    # Rolling: nixos-unstable with home-manager master (they track each other).
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
