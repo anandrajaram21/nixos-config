@@ -21,6 +21,11 @@
   boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # The monitor's HDMI port is wired to the GTX 1060, so nouveau drives the console.
+  # nouveau deadlocks when it wakes the GPU from runtime suspend (hung the installer twice),
+  # so never let it suspend. nvidia.nix replaces nouveau entirely.
+  boot.kernelParams = [ "nouveau.runpm=0" ];
+
   hardware.enableRedistributableFirmware = true;
   zramSwap.enable = true;
 
