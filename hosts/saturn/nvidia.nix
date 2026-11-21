@@ -18,7 +18,7 @@
     # No monitor attached, but keep the driver loaded so the GPU is ready for Plex/CUDA.
     nvidiaPersistenced = true;
 
-    # Optimus laptop: Intel iGPU drives the console, the NVIDIA GPU is used on demand.
+    # Optimus board with the internal panel removed: the only display is HDMI, wired to the NVIDIA GPU.
     prime = {
       offload.enable = true;
       intelBusId = "PCI:0:2:0";

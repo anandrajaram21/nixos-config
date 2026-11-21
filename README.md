@@ -20,7 +20,7 @@ Declarative NixOS configuration for **saturn**, a home server, built with
         ├── configuration.nix          # system config (boot, network, users, SSH, mounts)
         ├── hardware-configuration.nix # generated with --no-filesystems
         ├── disko.nix                  # SSD partition layout (also generates fileSystems)
-        └── nvidia.nix                 # NVIDIA driver module, not imported yet
+        └── nvidia.nix                 # NVIDIA driver module
 ```
 
 | Input | Tracks | Why |
@@ -41,7 +41,7 @@ Laptop board running headless, managed over SSH.
 | Data disk | NTFS HDD labelled `ScoobyDoo`, mounted read-only at `/mnt/data` |
 | Boot | UEFI, systemd-boot |
 
-The built-in panel doesn't work, and firmware screens (BIOS, boot menu) don't
+The built-in panel has been removed, and firmware screens (BIOS, boot menu) don't
 show on HDMI. The Linux console appears on HDMI once the kernel loads.
 
 ## Everyday use
@@ -128,13 +128,11 @@ rebuild stalls on `copying path ... from 'https://cache.nixos.org'`, restart
 it. Completed paths are kept, and a new connection usually lands on a
 faster edge.
 
-## Enabling the NVIDIA driver
+## NVIDIA driver
 
-`hosts/saturn/nvidia.nix` is ready but not imported. To enable it:
-
-1. Add `./nvidia.nix` to `imports` in `hosts/saturn/configuration.nix`.
-2. Run `sudo nixos-rebuild switch --flake .#saturn` (builds the kernel module locally).
-3. Check with `nvidia-smi`.
+`hosts/saturn/nvidia.nix` is imported from `configuration.nix` and replaces
+nouveau. After a rebuild (which builds the kernel module locally), reboot and
+check with `nvidia-smi`.
 
 The module uses the proprietary kernel modules (`open = false`) and the
 `legacy_580` driver. Pascal needs both: the open modules need Turing or newer,

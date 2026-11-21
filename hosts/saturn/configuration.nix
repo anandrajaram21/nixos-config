@@ -5,6 +5,7 @@
     # Generated with `nixos-generate-config --no-filesystems`; disko provides the mounts.
     ./hardware-configuration.nix
     ./disko.nix
+    ./nvidia.nix
   ];
 
   nix.settings = {
