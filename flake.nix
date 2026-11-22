@@ -19,23 +19,24 @@
 
   outputs = { self, nixpkgs, home-manager, disko, sops-nix, ... }:
     let
-      homeManagerFor = homeFile: {
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        home-manager.users.altf4 = import homeFile;
+      mkNixos = name: nixpkgs.lib.nixosSystem {
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "hm-backup";
+            home-manager.users.altf4 = import ./hosts/${name}/home.nix;
+          }
+          ./hosts/${name}/configuration.nix
+        ];
       };
       forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ];
     in
     {
-      nixosConfigurations.saturn = nixpkgs.lib.nixosSystem {
-        modules = [
-          disko.nixosModules.disko
-          sops-nix.nixosModules.sops
-          ./hosts/saturn/configuration.nix
-          home-manager.nixosModules.home-manager
-          (homeManagerFor ./hosts/saturn/home.nix)
-        ];
-      };
+      nixosConfigurations.saturn = mkNixos "saturn";
 
       checks.x86_64-linux = nixpkgs.lib.mapAttrs
         (_: host: host.config.system.build.toplevel)

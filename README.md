@@ -216,9 +216,11 @@ handles H.264/HEVC and uses far less power than the dGPU.
    at that machine's `/dev/disk/by-id/...`).
 2. Create `hosts/<name>/home.nix` that imports `../../home` and sets
    `home.stateVersion`.
-3. Add `nixosConfigurations.<name>` in `flake.nix`, using
-   `homeManagerFor ./hosts/<name>/home.nix`.
+3. Add `nixosConfigurations.<name> = mkNixos "<name>";` in `flake.nix`.
 
-For a Mac, add a `nix-darwin` input and a `darwinConfigurations.<name>` that
-uses `home-manager.darwinModules.home-manager`, plus a `modules/darwin/` that
-imports `../shared`.
+For a Mac, add a `nix-darwin` input, a `modules/darwin/` that imports
+`../shared`, and a `mkDarwin` helper like `mkNixos` that uses
+`sops-nix.darwinModules.sops` and `home-manager.darwinModules.home-manager`.
+
+If Home Manager would overwrite an existing file in your home directory, it
+moves it aside to `<file>.hm-backup` instead of failing.
