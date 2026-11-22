@@ -18,20 +18,21 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 ├── secrets/
 │   └── common.yaml                    # sops-encrypted secrets
 ├── modules/
-│   ├── shared/default.nix             # system settings for every host (NixOS and nix-darwin)
+│   ├── shared/
+│   │   ├── default.nix                # system settings for every host (NixOS and nix-darwin)
+│   │   └── sops.nix                   # which secrets each host decrypts
 │   └── nixos/default.nix              # system settings for every NixOS host; imports shared/
 ├── home/                              # Home Manager config for altf4 on every host
 │   ├── default.nix                    # imports the rest, CLI tools
 │   ├── shell.nix                      # fish, starship, direnv, fnm
-│   └── git.nix                        # git identity
+│   └── git.nix                        # git identity, GitHub SSH key, commit signing
 ├── hosts/
 │   └── saturn/
 │       ├── configuration.nix          # host-only system config (hostname, keys, mounts)
-│       ├── home.nix                   # Home Manager config for altf4 on saturn
+│       ├── home.nix                   # imports home/, sets home.stateVersion
 │       ├── hardware-configuration.nix # generated with --no-filesystems
 │       ├── disko.nix                  # SSD partition layout (also generates fileSystems)
-│       ├── nvidia.nix                 # NVIDIA driver module
-│       └── sops.nix                   # secrets decrypted on saturn
+│       └── nvidia.nix                 # NVIDIA driver module
 ├── assets/icon.svg
 └── AGENTS.md                          # notes for AI coding agents
 ```
