@@ -6,19 +6,8 @@
     ./disko.nix
     ./nvidia.nix
     ./sops.nix
-    ../../modules/common.nix
+    ../../modules/nixos
   ];
-
-  nix.settings.trusted-users = [ "@wheel" ];
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # nouveau deadlocks when waking the GPU from runtime suspend.
   boot.kernelParams = lib.mkIf (!lib.elem "nvidia" config.services.xserver.videoDrivers) [
@@ -26,15 +15,8 @@
   ];
 
   hardware.enableRedistributableFirmware = true;
-  zramSwap.enable = true;
-
-  # Lets prebuilt Linux binaries (e.g. Node from fnm) find a dynamic loader.
-  programs.nix-ld.enable = true;
 
   networking.hostName = "saturn";
-  networking.networkmanager.enable = true;
-
-  i18n.defaultLocale = "en_US.UTF-8";
 
   # Irreplaceable data: keep read-only.
   boot.supportedFilesystems = [ "ntfs" ];
@@ -44,32 +26,11 @@
     options = [ "ro" "nofail" "uid=1000" "gid=100" "umask=022" ];
   };
 
-  users.users.altf4 = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"
-    ];
-  };
-  security.sudo.wheelNeedsPassword = true;
-
-  services.tailscale.openFirewall = true;
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
-  };
-
-  environment.systemPackages = with pkgs; [
-    git
-    vim
-    curl
-    htop
-    ntfs3g
+  users.users.altf4.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"
   ];
+
+  environment.systemPackages = [ pkgs.ntfs3g ];
 
   # Install release; never change.
   system.stateVersion = "26.05";

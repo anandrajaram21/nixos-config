@@ -34,11 +34,12 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
 
 - Flakes only see git-tracked files. `git add` new files before evaluating or
   building, or you'll get "path does not exist".
-- Shared settings go in `modules/common.nix` (system) and `home/common.nix`
-  (user). Keep `modules/common.nix` to options that also exist in nix-darwin.
-- Host-specific settings, system and Home Manager, go in `hosts/<host>/`. New
-  features go in their own module file, imported from the host's `imports`
-  (see `nvidia.nix`).
+- Put each setting in the most general layer where it's valid:
+  `modules/shared/` (every host; only options that also exist in
+  nix-darwin), `modules/nixos/` (every NixOS host), `home/` (every host's
+  Home Manager), or `hosts/<host>/` (that machine only).
+- Self-contained features go in their own module file, imported where
+  they're needed (see `nvidia.nix`).
 - Check every host still evaluates after a change with
   `nix flake check --no-build`. For a pure refactor, compare
   `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath`

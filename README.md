@@ -6,35 +6,47 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 [flakes](https://nixos.wiki/wiki/Flakes),
 [Home Manager](https://github.com/nix-community/home-manager) and
 [disko](https://github.com/nix-community/disko). Shared settings live in
-`common.nix` files so more hosts can be added.
+`modules/` and `home/` so more hosts can be added.
 
 ## Layout
 
 ```
 .
-├── flake.nix                          # inputs + nixosConfigurations.saturn
+├── flake.nix                          # inputs, nixosConfigurations, checks, formatter
 ├── flake.lock                         # pinned input revisions
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
 │   └── common.yaml                    # sops-encrypted secrets
 ├── modules/
-│   └── common.nix                     # system settings shared by every host
-├── home/
-│   └── common.nix                     # Home Manager config for altf4 shared by every host
-└── hosts/
-    └── saturn/
-        ├── configuration.nix          # system config (boot, network, users, SSH, mounts)
-        ├── home.nix                   # Home Manager config for altf4 on saturn
-        ├── hardware-configuration.nix # generated with --no-filesystems
-        ├── disko.nix                  # SSD partition layout (also generates fileSystems)
-        ├── nvidia.nix                 # NVIDIA driver module
-        └── sops.nix                   # secrets decrypted on saturn
+│   ├── shared/default.nix             # system settings for every host (NixOS and nix-darwin)
+│   └── nixos/default.nix              # system settings for every NixOS host; imports shared/
+├── home/                              # Home Manager config for altf4 on every host
+│   ├── default.nix                    # imports the rest, CLI tools
+│   ├── shell.nix                      # fish, starship, direnv, fnm
+│   └── git.nix                        # git identity
+├── hosts/
+│   └── saturn/
+│       ├── configuration.nix          # host-only system config (hostname, keys, mounts)
+│       ├── home.nix                   # Home Manager config for altf4 on saturn
+│       ├── hardware-configuration.nix # generated with --no-filesystems
+│       ├── disko.nix                  # SSD partition layout (also generates fileSystems)
+│       ├── nvidia.nix                 # NVIDIA driver module
+│       └── sops.nix                   # secrets decrypted on saturn
+├── assets/icon.svg
+└── AGENTS.md                          # notes for AI coding agents
 ```
 
-Everything specific to a host lives in `hosts/<host>/`. Its
-`configuration.nix` imports `modules/common.nix`, and its `home.nix` imports
-`home/common.nix`. Put a setting in a `common.nix`
-file when every host should have it, and in the host file otherwise.
+Put each setting in the most general place where it's valid:
+
+- `modules/shared/`: every host, using only options nix-darwin also has.
+- `modules/nixos/`: every NixOS host. A future `modules/darwin/` would do the
+  same for Macs.
+- `home/`: every host's Home Manager config.
+- `hosts/<host>/`: that machine only. Its `configuration.nix` imports
+  `modules/nixos` and its `home.nix` imports `home/`.
+
+A self-contained feature goes in its own file (like `nvidia.nix`), imported
+where it's needed.
 
 | Input | Tracks | Why |
 |---|---|---|
@@ -197,15 +209,15 @@ handles H.264/HEVC and uses far less power than the dGPU.
 
 ## Adding another host
 
-1. Create `hosts/<name>/configuration.nix` that imports `../../modules/common.nix`.
+1. Create `hosts/<name>/configuration.nix` that imports `../../modules/nixos`.
    For NixOS, add `hardware-configuration.nix` (from
    `nixos-generate-config --no-filesystems`) and `disko.nix` (point `device`
    at that machine's `/dev/disk/by-id/...`).
-2. Create `hosts/<name>/home.nix` that imports `../../home/common.nix` and sets
+2. Create `hosts/<name>/home.nix` that imports `../../home` and sets
    `home.stateVersion`.
 3. Add `nixosConfigurations.<name>` in `flake.nix`, using
    `homeManagerFor ./hosts/<name>/home.nix`.
 
 For a Mac, add a `nix-darwin` input and a `darwinConfigurations.<name>` that
-uses `home-manager.darwinModules.home-manager`. `modules/common.nix` only uses
-options nix-darwin also has, so it can be imported there too.
+uses `home-manager.darwinModules.home-manager`, plus a `modules/darwin/` that
+imports `../shared`.

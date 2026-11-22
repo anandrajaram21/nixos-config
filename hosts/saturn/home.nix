@@ -5,7 +5,7 @@ let
   allowedSigners = ".ssh/allowed_signers";
 in
 {
-  imports = [ ../../home/common.nix ];
+  imports = [ ../../home ];
 
   programs.ssh = {
     enable = true;

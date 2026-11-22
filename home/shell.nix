@@ -1,21 +1,7 @@
 { pkgs, lib, ... }:
 
 {
-  home.packages = with pkgs; [
-    ripgrep
-    fd
-    jq
-    tmux
-    fnm
-  ];
-
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "Anand Rajaram";
-      email = "anandrajaram21@gmail.com";
-    };
-  };
+  home.packages = [ pkgs.fnm ];
 
   programs.fish = {
     enable = true;
