@@ -40,6 +40,9 @@ pins them.
   nix-darwin), `modules/nixos/` or `modules/darwin/` (every host on that
   platform), `home/` (every host's Home Manager; `home/darwin.nix` for
   Macs), or `hosts/<host>/` (that machine only).
+- Unfree packages are allowed only by name: add them to
+  `allowedUnfreePackages` in the module that uses them. Don't set
+  `nixpkgs.config.allowUnfree*` directly; definitions would conflict.
 - Self-contained features go in their own module file, imported where
   they're needed (see `nvidia.nix`).
 - Check every host still evaluates after a change with

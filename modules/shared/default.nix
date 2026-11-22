@@ -1,7 +1,10 @@
 { pkgs, ... }:
 
 {
-  imports = [ ./sops.nix ];
+  imports = [
+    ./sops.nix
+    ./unfree.nix
+  ];
 
   nix.settings.experimental-features = [
     "nix-command"

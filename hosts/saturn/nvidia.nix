@@ -1,7 +1,12 @@
-{ config, lib, ... }:
+{ config, ... }:
 
 {
-  nixpkgs.config.allowUnfreePredicate = pkg: lib.hasPrefix "nvidia" (lib.getName pkg);
+  allowedUnfreePackages = [
+    "nvidia-x11"
+    "nvidia-settings"
+    "nvidia-persistenced"
+    "nvidia-kernel-modules"
+  ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
 

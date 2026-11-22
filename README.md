@@ -185,8 +185,9 @@ faster edge.
 nouveau. After a rebuild (which builds the kernel module locally), reboot and
 check with `nvidia-smi`.
 
-Only `nvidia*` packages are allowed to be unfree. Add others to
-`allowUnfreePredicate` in `nvidia.nix` (e.g. CUDA) when needed.
+Unfree packages must be listed by name in `allowedUnfreePackages`
+(`modules/shared/unfree.nix`). `nvidia.nix` lists the driver's; add others
+there (e.g. CUDA) when needed.
 
 The module uses the proprietary kernel modules (`open = false`) and the
 `legacy_580` driver. Pascal needs both: the open modules need Turing or newer,
