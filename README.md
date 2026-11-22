@@ -14,6 +14,9 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 .
 ├── flake.nix                          # inputs + nixosConfigurations.saturn
 ├── flake.lock                         # pinned input revisions
+├── .sops.yaml                         # which age keys can decrypt secrets/
+├── secrets/
+│   └── common.yaml                    # sops-encrypted secrets
 ├── modules/
 │   └── common.nix                     # system settings shared by every host
 ├── home/
@@ -24,7 +27,8 @@ Declarative NixOS configuration for **saturn**, a home server, built with
         ├── home.nix                   # Home Manager config for altf4 on saturn
         ├── hardware-configuration.nix # generated with --no-filesystems
         ├── disko.nix                  # SSD partition layout (also generates fileSystems)
-        └── nvidia.nix                 # NVIDIA driver module
+        ├── nvidia.nix                 # NVIDIA driver module
+        └── sops.nix                   # secrets decrypted on saturn
 ```
 
 Everything specific to a host lives in `hosts/<host>/`. Its
@@ -37,6 +41,7 @@ file when every host should have it, and in the host file otherwise.
 | `nixpkgs` | `nixos-unstable` | Packages and NixOS modules (rolling) |
 | `home-manager` | `master` | User-level config; follows our `nixpkgs` |
 | `disko` | `master` | Declarative partitioning; follows our `nixpkgs` |
+| `sops-nix` | `master` | Encrypted secrets; follows our `nixpkgs` |
 
 ## Hardware: saturn
 
@@ -136,6 +141,34 @@ Some Fastly edges are sometimes slow from this network. If an install or
 rebuild stalls on `copying path ... from 'https://cache.nixos.org'`, restart
 it. Completed paths are kept, and a new connection usually lands on a
 faster edge.
+
+## Secrets
+
+Secrets are encrypted with [sops-nix](https://github.com/Mic92/sops-nix) and
+committed in `secrets/`. `.sops.yaml` lists who can decrypt them:
+
+- `altf4`: an age key on the Mac at
+  `~/Library/Application Support/sops/age/keys.txt`, used to edit secrets.
+  Keep a backup of it.
+- `saturn`: derived from saturn's SSH host key, used at boot and on rebuild
+  to decrypt into `/run/secrets/`.
+
+| Secret | Used for |
+|---|---|
+| `github_ssh_key` | GitHub SSH auth and commit signing for altf4 |
+
+```bash
+# Edit secrets (on the Mac; needs `brew install sops age`)
+sops secrets/common.yaml
+
+# After adding a host or key to .sops.yaml, re-encrypt for the new recipients
+sops updatekeys secrets/common.yaml
+```
+
+A new host's age key comes from its SSH host key:
+`nix run nixpkgs#ssh-to-age -- -i /etc/ssh/ssh_host_ed25519_key.pub`.
+After a reinstall, saturn gets a new host key, so update its entry in
+`.sops.yaml` and run `sops updatekeys` before rebuilding.
 
 ## NVIDIA driver
 

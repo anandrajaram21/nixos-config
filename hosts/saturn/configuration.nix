@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ./nvidia.nix
+    ./sops.nix
     ../../modules/common.nix
   ];
 

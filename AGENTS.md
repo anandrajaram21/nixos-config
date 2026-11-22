@@ -23,9 +23,10 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
   `--mode mount`.
 - **Commits:** Prefer small, focused commits with a short summary line
   and a body that explains why.
-- **No secrets in Nix files.** Everything in the config ends up in the
-  world-readable `/nix/store`. Set passwords imperatively (`passwd`). Public
-  SSH keys are fine.
+- **No plaintext secrets in Nix files.** Everything in the config ends up in
+  the world-readable `/nix/store`. Put secrets in `secrets/` with sops (see
+  README), and reference them by `config.sops.secrets.<name>.path`. Never
+  write decrypted secrets to the repo or the store. Public SSH keys are fine.
 - **Don't change `system.stateVersion` or `home.stateVersion`** (`26.05` on
   saturn). They record the install release, not the running version.
 

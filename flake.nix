@@ -11,9 +11,13 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, disko, ... }:
+  outputs = { nixpkgs, home-manager, disko, sops-nix, ... }:
     let
       homeManagerFor = homeFile: {
         home-manager.useGlobalPkgs = true;
@@ -25,6 +29,7 @@
       nixosConfigurations.saturn = nixpkgs.lib.nixosSystem {
         modules = [
           disko.nixosModules.disko
+          sops-nix.nixosModules.sops
           ./hosts/saturn/configuration.nix
           home-manager.nixosModules.home-manager
           (homeManagerFor ./hosts/saturn/home.nix)
