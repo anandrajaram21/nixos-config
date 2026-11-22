@@ -26,18 +26,21 @@ Declarative configuration for my machines, built with
 ├── modules/
 │   ├── shared/
 │   │   ├── default.nix                # system settings for every host (NixOS and nix-darwin)
-│   │   └── sops.nix                   # which secrets each host decrypts
+│   │   ├── sops.nix                   # which secrets each host decrypts
+│   │   └── unfree.nix                 # allowedUnfreePackages: unfree packages allowed by name
 │   ├── nixos/default.nix              # system settings for every NixOS host; imports shared/
-│   └── darwin/default.nix             # system settings for every Mac; imports shared/
+│   └── darwin/
+│       ├── default.nix                # system settings for every Mac; imports shared/
+│       └── apps.nix                   # GUI apps from nixpkgs, copied to /Applications/Nix Apps
 ├── home/                              # Home Manager config for altf4
-│   ├── default.nix                    # every host: imports shell.nix and git.nix, CLI tools
+│   ├── default.nix                    # every host: imports shell.nix and git.nix, CLI and dev tools
 │   ├── shell.nix                      # fish, starship, zoxide, direnv, fnm, nvim
 │   ├── git.nix                        # git identity, gh, GitHub SSH key, commit signing
 │   └── darwin.nix                     # every Mac: PATHs, OrbStack, 1Password SSH agent
 ├── hosts/
 │   ├── mercury/
 │   │   ├── configuration.nix          # hostname, stateVersion, imports
-│   │   ├── homebrew.nix               # Homebrew formulae, casks and App Store apps
+│   │   ├── homebrew.nix               # what nixpkgs can't provide: Homebrew and App Store apps
 │   │   └── home.nix                   # imports home/ and home/darwin.nix
 │   └── saturn/
 │       ├── configuration.nix          # host-only system config (hostname, keys, mounts)
@@ -237,11 +240,27 @@ sudo darwin-rebuild switch --flake .#mercury
 sudo darwin-rebuild switch --rollback
 ```
 
-Homebrew packages are declared in `hosts/mercury/homebrew.nix`. Packages
-removed from that list stay installed, because
+Prefer nixpkgs, and use Homebrew only for what nixpkgs lacks or can't run
+well:
+
+- CLI tools go in `home/default.nix` (every host) or `home/darwin.nix`
+  (Mac-only).
+- GUI apps go in `modules/darwin/apps.nix`, with unfree ones added to
+  `allowedUnfreePackages` there.
+- Homebrew (`hosts/mercury/homebrew.nix`) is for the rest. Right now that's
+  apps missing from nixpkgs, 1Password (it must live directly in
+  `/Applications`), `opencode` (not in the binary cache for darwin, so it
+  would build from source), and `mas` for App Store installs.
+
+Before moving a package to nixpkgs, check it's in cache.nixos.org for
+`aarch64-darwin`, or is an unfree app that nixpkgs just repackages (those
+aren't cached, but only download the vendor's build). For example, plain
+`firefox` would compile from source on darwin, so use `firefox-bin`.
+
+GUI apps from nixpkgs update with `nix flake update`, not through their own
+updaters. Homebrew packages removed from the list stay installed, because
 `homebrew.onActivation.cleanup` is `"none"`. Set it to `"uninstall"` to
-make the list authoritative. CLI tools that every host should have go in
-`home/` instead, from nixpkgs.
+make the list authoritative.
 
 ## Secrets
 

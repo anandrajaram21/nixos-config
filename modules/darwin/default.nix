@@ -1,7 +1,10 @@
 { pkgs, ... }:
 
 {
-  imports = [ ../shared ];
+  imports = [
+    ../shared
+    ./apps.nix
+  ];
 
   system.primaryUser = "altf4";
   users.users.altf4.home = "/Users/altf4";

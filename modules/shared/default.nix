@@ -11,6 +11,8 @@
     "flakes"
   ];
 
+  allowedUnfreePackages = [ "claude-code" ];
+
   time.timeZone = "Asia/Kolkata";
 
   programs.fish.enable = true;

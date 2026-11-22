@@ -11,5 +11,14 @@
     fd
     jq
     tmux
+    claude-code
+    android-tools
+    agent-browser
+    beads
+    bun
+    pnpm
+    uv
+    php
+    phpPackages.composer
   ];
 }
