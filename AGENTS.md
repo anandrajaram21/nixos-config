@@ -53,9 +53,10 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
 - **nouveau deadlock:** the HDMI port is on the GTX 1060, so nouveau drives
   the console. If the GPU runtime-suspends and is later woken, nouveau
   deadlocks while holding the console lock, and anything touching a TTY
-  hangs. `nouveau.runpm=0` (in `configuration.nix`) prevents this. Don't
-  remove it while nouveau is in use. On a live installer without that
-  parameter, avoid `lspci` or other PCI probing.
+  hangs. `nouveau.runpm=0` (in `configuration.nix`) prevents this. It's only
+  applied when `nvidia.nix` isn't imported, since the NVIDIA driver
+  blacklists nouveau. Keep it for whenever nouveau is in use. On a live
+  installer without that parameter, avoid `lspci` or other PCI probing.
 - **NVIDIA:** the GTX 1060 is Pascal. It needs `hardware.nvidia.open = false`
   and `nvidiaPackages.legacy_580`, because newer driver series and CUDA 13
   dropped Pascal. PRIME bus IDs: Intel `PCI:0:2:0`, NVIDIA `PCI:1:0:0`.

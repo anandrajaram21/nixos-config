@@ -136,7 +136,8 @@ while holding the console lock. Everything that touches a TTY then hangs: the
 console, `sudo` on the console, systemd units and Nix builds (they open a pty).
 
 - **Installed system:** `boot.kernelParams = [ "nouveau.runpm=0" ]` stops the
-  GPU from runtime-suspending at all.
+  GPU from runtime-suspending at all. It's only set when nouveau is in use,
+  i.e. when `nvidia.nix` isn't imported.
 - **Installer:** while the console is still visible, run
   `echo on | sudo tee /sys/bus/pci/devices/0000:01:00.0/power/control`
   before switching inputs or running anything that probes PCI devices (`lspci`).
@@ -182,6 +183,9 @@ After a reinstall, saturn gets a new host key, so update its entry in
 `hosts/saturn/nvidia.nix` is imported from `configuration.nix` and replaces
 nouveau. After a rebuild (which builds the kernel module locally), reboot and
 check with `nvidia-smi`.
+
+Only `nvidia*` packages are allowed to be unfree. Add others to
+`allowUnfreePredicate` in `nvidia.nix` (e.g. CUDA) when needed.
 
 The module uses the proprietary kernel modules (`open = false`) and the
 `legacy_580` driver. Pascal needs both: the open modules need Turing or newer,

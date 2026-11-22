@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -21,7 +21,9 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # nouveau deadlocks when waking the GPU from runtime suspend.
-  boot.kernelParams = [ "nouveau.runpm=0" ];
+  boot.kernelParams = lib.mkIf (!lib.elem "nvidia" config.services.xserver.videoDrivers) [
+    "nouveau.runpm=0"
+  ];
 
   hardware.enableRedistributableFirmware = true;
   zramSwap.enable = true;
