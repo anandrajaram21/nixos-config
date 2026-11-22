@@ -5,10 +5,11 @@ layout and everyday commands.
 
 ## What this is
 
-A NixOS flake, currently with one host, `saturn` (a headless home server),
-with Home Manager as a NixOS module and disko for partitioning. Shared
-settings are split out so more hosts (including a nix-darwin Mac) can be
-added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
+A flake for several machines: `saturn` (a headless NixOS home server, with
+disko for partitioning) and `mercury` (a Mac with nix-darwin and Homebrew
+via nix-darwin). Home Manager runs as a NixOS or nix-darwin module on each.
+More hosts will be added. Inputs track `nixos-unstable`, and `flake.lock`
+pins them.
 
 ## Hard rules
 
@@ -27,21 +28,22 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
   the world-readable `/nix/store`. Put secrets in `secrets/` with sops (see
   README), and reference them by `config.sops.secrets.<name>.path`. Never
   write decrypted secrets to the repo or the store. Public SSH keys are fine.
-- **Don't change `system.stateVersion` or `home.stateVersion`** (`26.05` on
-  saturn). They record the install release, not the running version.
+- **Don't change `system.stateVersion` or `home.stateVersion`** once a host
+  is installed. They record the install release, not the running version.
 
 ## Working on the config
 
 - Flakes only see git-tracked files. `git add` new files before evaluating or
   building, or you'll get "path does not exist".
 - Put each setting in the most general layer where it's valid:
-  `modules/shared/` (every host; only options that also exist in
-  nix-darwin), `modules/nixos/` (every NixOS host), `home/` (every host's
-  Home Manager), or `hosts/<host>/` (that machine only).
+  `modules/shared/` (every host; only options that exist in both NixOS and
+  nix-darwin), `modules/nixos/` or `modules/darwin/` (every host on that
+  platform), `home/` (every host's Home Manager; `home/darwin.nix` for
+  Macs), or `hosts/<host>/` (that machine only).
 - Self-contained features go in their own module file, imported where
   they're needed (see `nvidia.nix`).
 - Check every host still evaluates after a change with
-  `nix flake check --no-build`. For a pure refactor, compare
+  `nix flake check --no-build --all-systems`. For a pure refactor, compare
   `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath`
   before and after; it should not change.
 - Run `nix fmt` (nixfmt) before committing. Keep comments minimal: only
@@ -65,6 +67,10 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
   so changes that need interaction at boot aren't an option.
 
 ## Remote access
+
+- mercury is the Mac this repo is usually edited on. Don't run
+  `darwin-rebuild` or change its Homebrew setup without the owner asking.
+  Nix may not be installed on it, so evaluate on saturn if needed.
 
 - Installed system: `ssh altf4@192.168.0.69` (key auth, `PermitRootLogin no`).
   `sudo` needs a password, so run commands that need root interactively, or

@@ -2,17 +2,23 @@
 
 # nixos-config
 
-Declarative NixOS configuration for **saturn**, a home server, built with
+Declarative configuration for my machines, built with
 [flakes](https://nixos.wiki/wiki/Flakes),
-[Home Manager](https://github.com/nix-community/home-manager) and
+[Home Manager](https://github.com/nix-community/home-manager),
+[nix-darwin](https://github.com/nix-darwin/nix-darwin) and
 [disko](https://github.com/nix-community/disko). Shared settings live in
 `modules/` and `home/` so more hosts can be added.
+
+| Host | Kind | Platform |
+|---|---|---|
+| `saturn` | Headless home server | NixOS, `x86_64-linux` |
+| `mercury` | Laptop | macOS with nix-darwin, `aarch64-darwin` |
 
 ## Layout
 
 ```
 .
-├── flake.nix                          # inputs, nixosConfigurations, checks, formatter
+├── flake.nix                          # inputs, mkNixos/mkDarwin, hosts, checks, formatter
 ├── flake.lock                         # pinned input revisions
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
@@ -21,12 +27,18 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 │   ├── shared/
 │   │   ├── default.nix                # system settings for every host (NixOS and nix-darwin)
 │   │   └── sops.nix                   # which secrets each host decrypts
-│   └── nixos/default.nix              # system settings for every NixOS host; imports shared/
-├── home/                              # Home Manager config for altf4 on every host
-│   ├── default.nix                    # imports the rest, CLI tools
-│   ├── shell.nix                      # fish, starship, direnv, fnm
-│   └── git.nix                        # git identity, GitHub SSH key, commit signing
+│   ├── nixos/default.nix              # system settings for every NixOS host; imports shared/
+│   └── darwin/default.nix             # system settings for every Mac; imports shared/
+├── home/                              # Home Manager config for altf4
+│   ├── default.nix                    # every host: imports shell.nix and git.nix, CLI tools
+│   ├── shell.nix                      # fish, starship, zoxide, direnv, fnm, nvim
+│   ├── git.nix                        # git identity, gh, GitHub SSH key, commit signing
+│   └── darwin.nix                     # every Mac: PATHs, OrbStack, 1Password SSH agent
 ├── hosts/
+│   ├── mercury/
+│   │   ├── configuration.nix          # hostname, stateVersion, imports
+│   │   ├── homebrew.nix               # Homebrew formulae, casks and App Store apps
+│   │   └── home.nix                   # imports home/ and home/darwin.nix
 │   └── saturn/
 │       ├── configuration.nix          # host-only system config (hostname, keys, mounts)
 │       ├── home.nix                   # imports home/, sets home.stateVersion
@@ -40,11 +52,10 @@ Declarative NixOS configuration for **saturn**, a home server, built with
 Put each setting in the most general place where it's valid:
 
 - `modules/shared/`: every host, using only options nix-darwin also has.
-- `modules/nixos/`: every NixOS host. A future `modules/darwin/` would do the
-  same for Macs.
-- `home/`: every host's Home Manager config.
+- `modules/nixos/` or `modules/darwin/`: every host on that platform.
+- `home/`: every host's Home Manager config. `home/darwin.nix` is for Macs only.
 - `hosts/<host>/`: that machine only. Its `configuration.nix` imports
-  `modules/nixos` and its `home.nix` imports `home/`.
+  `modules/nixos` or `modules/darwin`, and its `home.nix` imports `home/`.
 
 A self-contained feature goes in its own file (like `nvidia.nix`), imported
 where it's needed.
@@ -55,6 +66,7 @@ where it's needed.
 | `home-manager` | `master` | User-level config; follows our `nixpkgs` |
 | `disko` | `master` | Declarative partitioning; follows our `nixpkgs` |
 | `sops-nix` | `master` | Encrypted secrets; follows our `nixpkgs` |
+| `nix-darwin` | `master` | macOS system config; follows our `nixpkgs` |
 
 ## Hardware: saturn
 
@@ -71,7 +83,7 @@ Laptop board running headless, managed over SSH.
 The built-in panel has been removed, and firmware screens (BIOS, boot menu) don't
 show on HDMI. The Linux console appears on HDMI once the kernel loads.
 
-## Everyday use
+## Everyday use: saturn
 
 Run these on saturn from a clone of this repo (`~/nixos-config`):
 
@@ -82,7 +94,7 @@ sudo nixos-rebuild switch --flake .#saturn
 # Build and activate on next boot only
 sudo nixos-rebuild boot --flake .#saturn
 
-# Update all inputs (nixpkgs, home-manager, disko, sops-nix), then rebuild
+# Update all inputs, then rebuild
 nix flake update
 sudo nixos-rebuild switch --flake .#saturn
 
@@ -101,8 +113,12 @@ Before committing, format and check that every host still evaluates:
 
 ```bash
 nix fmt
-nix flake check --no-build   # drop --no-build to build every host
+nix flake check --no-build --all-systems   # evaluates saturn and mercury
 ```
+
+Without `--all-systems`, `nix flake check` only checks hosts for the machine's
+own platform. Dropping `--no-build` builds them, which only works for that
+platform.
 
 Every rebuild creates a new generation in the systemd-boot menu (the last 10
 are kept). If a change breaks booting, choose an older generation at boot. On
@@ -110,7 +126,7 @@ saturn you can't see that menu, so either run `sudo nixos-rebuild switch
 --rollback` over SSH, or pick the entry for the next boot with
 `sudo bootctl set-oneshot <entry>.conf`.
 
-## Fresh install
+## Fresh install: saturn
 
 From the NixOS minimal ISO, booted in UEFI mode:
 
@@ -137,7 +153,7 @@ installer's channel and can stall for a long time downloading dependencies.
 To re-mount an already-partitioned disk without wiping it, run
 `--mode mount` instead of `destroy,format,mount`.
 
-## Known issues
+## Known issues: saturn
 
 ### nouveau deadlocks on GPU wake-up
 
@@ -162,6 +178,69 @@ Some Fastly edges are sometimes slow from this network. If an install or
 rebuild stalls on `copying path ... from 'https://cache.nixos.org'`, restart
 it. Completed paths are kept, and a new connection usually lands on a
 faster edge.
+
+## NVIDIA driver: saturn
+
+`hosts/saturn/nvidia.nix` is imported from `configuration.nix` and replaces
+nouveau. After a rebuild (which builds the kernel module locally), reboot and
+check with `nvidia-smi`.
+
+Only `nvidia*` packages are allowed to be unfree. Add others to
+`allowUnfreePredicate` in `nvidia.nix` (e.g. CUDA) when needed.
+
+The module uses the proprietary kernel modules (`open = false`) and the
+`legacy_580` driver. Pascal needs both: the open modules need Turing or newer,
+and 580 is the last driver series that supports Pascal. CUDA 13 also dropped
+Pascal, so CUDA workloads such as Ollama need a CUDA 12 build.
+
+For media transcoding, the Intel iGPU (Quick Sync, `intel-media-driver`)
+handles H.264/HEVC and uses far less power than the dGPU.
+
+## mercury
+
+### Fresh setup
+
+On a fresh macOS install:
+
+1. Install Nix with the official installer, so nix-darwin manages it:
+   `sh <(curl -L https://nixos.org/nix/install)`.
+2. Install [Homebrew](https://brew.sh). nix-darwin runs `brew bundle` but
+   doesn't install Homebrew itself.
+3. Restore the personal age key to
+   `~/Library/Application Support/sops/age/keys.txt` from its backup. Without
+   it, the GitHub key can't be decrypted and git signing won't work.
+4. Clone this repo (over HTTPS, since the SSH key isn't set up yet) and run
+   the first switch:
+
+   ```bash
+   sudo nix --extra-experimental-features "nix-command flakes" \
+     run github:nix-darwin/nix-darwin#darwin-rebuild -- switch --flake .#mercury
+   ```
+
+5. Make fish the login shell: `chsh -s /run/current-system/sw/bin/fish`.
+6. Restore the remaining dotfiles with yadm, minus anything this repo now
+   manages (see below).
+
+Home Manager owns fish, git, ssh and starship on mercury. yadm still holds
+other dotfiles (Ghostty, OpenCode, Claude, ...), but must not track
+`.config/fish/config.fish` or `.config/fish/conf.d/{fnm,uv}.fish`, and its
+Homebrew and shell bootstrap scripts are replaced by `hosts/mercury/`.
+
+### Everyday use
+
+```bash
+# Apply config changes
+sudo darwin-rebuild switch --flake .#mercury
+
+# Roll back to the previous generation
+sudo darwin-rebuild switch --rollback
+```
+
+Homebrew packages are declared in `hosts/mercury/homebrew.nix`. Packages
+removed from that list stay installed, because
+`homebrew.onActivation.cleanup` is `"none"`. Set it to `"uninstall"` to
+make the list authoritative. CLI tools that every host should have go in
+`home/` instead, from nixpkgs.
 
 ## Secrets
 
@@ -189,7 +268,7 @@ in that host's directory with `sopsFile = ../../secrets/<host>.yaml;`.
 | `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
 
 ```bash
-# Edit secrets (on the Mac; needs `brew install sops age`)
+# Edit secrets (on a Mac; home/darwin.nix installs sops and age)
 sops secrets/common.yaml
 
 # After adding a host or key to .sops.yaml, re-encrypt for the new recipients
@@ -202,36 +281,19 @@ under `keys`, add it to the `common.yaml` rule, add a `<host>.yaml` rule, and
 run `sops updatekeys secrets/common.yaml`. After a reinstall, a host gets a new
 host key, so update its entry the same way before rebuilding.
 
-## NVIDIA driver
-
-`hosts/saturn/nvidia.nix` is imported from `configuration.nix` and replaces
-nouveau. After a rebuild (which builds the kernel module locally), reboot and
-check with `nvidia-smi`.
-
-Only `nvidia*` packages are allowed to be unfree. Add others to
-`allowUnfreePredicate` in `nvidia.nix` (e.g. CUDA) when needed.
-
-The module uses the proprietary kernel modules (`open = false`) and the
-`legacy_580` driver. Pascal needs both: the open modules need Turing or newer,
-and 580 is the last driver series that supports Pascal. CUDA 13 also dropped
-Pascal, so CUDA workloads such as Ollama need a CUDA 12 build.
-
-For media transcoding, the Intel iGPU (Quick Sync, `intel-media-driver`)
-handles H.264/HEVC and uses far less power than the dGPU.
-
 ## Adding another host
 
-1. Create `hosts/<name>/configuration.nix` that imports `../../modules/nixos`.
-   For NixOS, add `hardware-configuration.nix` (from
-   `nixos-generate-config --no-filesystems`) and `disko.nix` (point `device`
-   at that machine's `/dev/disk/by-id/...`).
-2. Create `hosts/<name>/home.nix` that imports `../../home` and sets
-   `home.stateVersion`.
-3. Add `nixosConfigurations.<name> = mkNixos "<name>";` in `flake.nix`.
-
-For a Mac, add a `nix-darwin` input, a `modules/darwin/` that imports
-`../shared`, and a `mkDarwin` helper like `mkNixos` that uses
-`sops-nix.darwinModules.sops` and `home-manager.darwinModules.home-manager`.
+1. Create `hosts/<name>/configuration.nix` that imports `../../modules/nixos`
+   or `../../modules/darwin` and sets `system.stateVersion`. For NixOS, add
+   `hardware-configuration.nix` (from `nixos-generate-config
+   --no-filesystems`) and `disko.nix` (point `device` at that machine's
+   `/dev/disk/by-id/...`). For a Mac, set `nixpkgs.hostPlatform`.
+2. Create `hosts/<name>/home.nix` that imports `../../home` (and
+   `../../home/darwin.nix` on a Mac) and sets `home.stateVersion`.
+3. Add `nixosConfigurations.<name> = mkNixos "<name>";` or
+   `darwinConfigurations.<name> = mkDarwin "<name>";` in `flake.nix`. `nix
+   flake check` picks it up automatically.
+4. For a NixOS host, add its age key to `.sops.yaml` (see Secrets).
 
 If Home Manager would overwrite an existing file in your home directory, it
 moves it aside to `<file>.hm-backup` instead of failing.
