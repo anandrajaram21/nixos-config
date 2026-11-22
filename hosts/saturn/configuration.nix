@@ -26,6 +26,9 @@
   hardware.enableRedistributableFirmware = true;
   zramSwap.enable = true;
 
+  # Lets prebuilt Linux binaries (e.g. Node from fnm) find a dynamic loader.
+  programs.nix-ld.enable = true;
+
   networking.hostName = "saturn";
   networking.networkmanager.enable = true;
 
