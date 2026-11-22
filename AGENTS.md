@@ -39,10 +39,12 @@ added. Inputs track `nixos-unstable`, and `flake.lock` pins them.
 - Host-specific settings, system and Home Manager, go in `hosts/<host>/`. New
   features go in their own module file, imported from the host's `imports`
   (see `nvidia.nix`).
-- Check every host still evaluates after a change, e.g.
-  `nix eval .#nixosConfigurations.saturn.config.system.build.toplevel.drvPath`.
-- Match the existing style: two-space indent and minimal comments. Comment
-  only safety warnings and non-obvious hardware workarounds, in one line.
+- Check every host still evaluates after a change with
+  `nix flake check --no-build`. For a pure refactor, compare
+  `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath`
+  before and after; it should not change.
+- Run `nix fmt` (nixfmt) before committing. Keep comments minimal: only
+  safety warnings and non-obvious hardware workarounds, in one line.
 - `hardware-configuration.nix` is generated with `--no-filesystems`, because
   disko provides `fileSystems`. Don't add filesystem entries there.
 

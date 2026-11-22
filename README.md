@@ -69,7 +69,7 @@ sudo nixos-rebuild switch --flake .#saturn
 # Build and activate on next boot only
 sudo nixos-rebuild boot --flake .#saturn
 
-# Update all inputs (nixpkgs, home-manager, disko), then rebuild
+# Update all inputs (nixpkgs, home-manager, disko, sops-nix), then rebuild
 nix flake update
 sudo nixos-rebuild switch --flake .#saturn
 
@@ -83,6 +83,13 @@ sudo nix-collect-garbage --delete-older-than 30d
 
 Flakes only see files tracked by git. `git add` new files before you rebuild,
 or Nix reports that the path doesn't exist.
+
+Before committing, format and check that every host still evaluates:
+
+```bash
+nix fmt
+nix flake check --no-build   # drop --no-build to build every host
+```
 
 Every rebuild creates a new generation in the systemd-boot menu (the last 10
 are kept). If a change breaks booting, choose an older generation at boot. On

@@ -17,13 +17,14 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, disko, sops-nix, ... }:
+  outputs = { self, nixpkgs, home-manager, disko, sops-nix, ... }:
     let
       homeManagerFor = homeFile: {
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.users.altf4 = import homeFile;
       };
+      forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ];
     in
     {
       nixosConfigurations.saturn = nixpkgs.lib.nixosSystem {
@@ -35,5 +36,11 @@
           (homeManagerFor ./hosts/saturn/home.nix)
         ];
       };
+
+      checks.x86_64-linux = nixpkgs.lib.mapAttrs
+        (_: host: host.config.system.build.toplevel)
+        self.nixosConfigurations;
+
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
     };
 }
