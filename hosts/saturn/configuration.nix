@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -22,7 +27,13 @@
   fileSystems."/mnt/data" = {
     device = "/dev/disk/by-uuid/6CA2C4DCA2C4AC40";
     fsType = "ntfs3";
-    options = [ "ro" "nofail" "uid=1000" "gid=100" "umask=022" ];
+    options = [
+      "ro"
+      "nofail"
+      "uid=1000"
+      "gid=100"
+      "umask=022"
+    ];
   };
 
   users.users.altf4.openssh.authorizedKeys.keys = [

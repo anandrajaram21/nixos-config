@@ -3,7 +3,10 @@
 {
   imports = [ ./sops.nix ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   time.timeZone = "Asia/Kolkata";
 

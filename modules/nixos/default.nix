@@ -25,7 +25,10 @@
 
   users.users.altf4 = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
   };
   security.sudo.wheelNeedsPassword = true;
 
