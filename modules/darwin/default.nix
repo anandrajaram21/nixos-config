@@ -26,5 +26,6 @@
   homebrew = {
     enable = true;
     enableFishIntegration = true;
+    casks = [ "1password" ];
   };
 }

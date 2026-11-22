@@ -5,7 +5,6 @@
       "opencode"
     ];
     casks = [
-      "1password"
       "helium-browser"
       "local"
       "t3-code"

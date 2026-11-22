@@ -248,8 +248,9 @@ well:
 - GUI apps go in `modules/darwin/apps.nix`, with unfree ones added to
   `allowedUnfreePackages` there.
 - Homebrew (`hosts/mercury/homebrew.nix`) is for the rest. Right now that's
-  apps missing from nixpkgs, 1Password (it must live directly in
-  `/Applications`), `opencode` (not in the binary cache for darwin, so it
+  apps missing from nixpkgs, 1Password (in `modules/darwin`, since every
+  Mac's SSH uses its agent, and it must live directly in `/Applications`),
+  `opencode` (not in the binary cache for darwin, so it
   would build from source), and `mas` for App Store installs.
 
 Before moving a package to nixpkgs, check it's in cache.nixos.org for
