@@ -47,6 +47,8 @@
   };
   security.sudo.wheelNeedsPassword = true;
 
+  services.tailscale.openFirewall = true;
+
   services.openssh = {
     enable = true;
     settings = {

@@ -5,6 +5,8 @@
 
   time.timeZone = "Asia/Kolkata";
 
+  services.tailscale.enable = true;
+
   programs.fish.enable = true;
   users.users.altf4.shell = pkgs.fish;
 }
