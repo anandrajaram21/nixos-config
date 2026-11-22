@@ -168,15 +168,25 @@ faster edge.
 Secrets are encrypted with [sops-nix](https://github.com/Mic92/sops-nix) and
 committed in `secrets/`. `.sops.yaml` lists who can decrypt them:
 
-- `altf4`: an age key on the Mac at
-  `~/Library/Application Support/sops/age/keys.txt`, used to edit secrets.
-  Keep a backup of it.
-- `saturn`: derived from saturn's SSH host key, used at boot and on rebuild
-  to decrypt into `/run/secrets/`.
+- `altf4`: a personal age key at
+  `~/Library/Application Support/sops/age/keys.txt` on each Mac. It's used to
+  edit secrets, and Macs also decrypt with it. Keep a backup of it.
+- One key per NixOS host (e.g. `saturn`), derived from its SSH host key and
+  used at boot and on rebuild to decrypt into `/run/secrets/`.
 
-| Secret | Used for |
-|---|---|
-| `github_ssh_key` | GitHub SSH auth and commit signing for altf4 |
+Secrets are split by who needs them:
+
+| File | Recipients | Holds |
+|---|---|---|
+| `secrets/common.yaml` | `altf4` and every NixOS host | Secrets every host uses |
+| `secrets/<host>.yaml` | `altf4` and that host | Secrets only that host uses |
+
+`modules/shared/sops.nix` declares the common secrets. A host-only secret goes
+in that host's directory with `sopsFile = ../../secrets/<host>.yaml;`.
+
+| Secret | File | Used for |
+|---|---|---|
+| `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
 
 ```bash
 # Edit secrets (on the Mac; needs `brew install sops age`)
@@ -186,10 +196,11 @@ sops secrets/common.yaml
 sops updatekeys secrets/common.yaml
 ```
 
-A new host's age key comes from its SSH host key:
-`nix run nixpkgs#ssh-to-age -- -i /etc/ssh/ssh_host_ed25519_key.pub`.
-After a reinstall, saturn gets a new host key, so update its entry in
-`.sops.yaml` and run `sops updatekeys` before rebuilding.
+To add a NixOS host, get its age key from its SSH host key with
+`nix run nixpkgs#ssh-to-age -- -i /etc/ssh/ssh_host_ed25519_key.pub`, add it
+under `keys`, add it to the `common.yaml` rule, add a `<host>.yaml` rule, and
+run `sops updatekeys secrets/common.yaml`. After a reinstall, a host gets a new
+host key, so update its entry the same way before rebuilding.
 
 ## NVIDIA driver
 

@@ -2,8 +2,17 @@ keys:
   - &altf4 age1rdhcnddjx3s3kp5cuma0w4z590tpf2w38u08kk7hafddj7uvc45s2cywl4
   - &saturn age1ftzg0ypwf6ath7cu645lspwu5jm0wmhzu2mm43uucyj54mxy3cgqmj68kd
 creation_rules:
-  - path_regex: secrets/[^/]+\.yaml$
+  - path_regex: secrets/common\.yaml$
     key_groups:
       - age:
           - *altf4
           - *saturn
+  - path_regex: secrets/saturn\.yaml$
+    key_groups:
+      - age:
+          - *altf4
+          - *saturn
+  - path_regex: secrets/mercury\.yaml$
+    key_groups:
+      - age:
+          - *altf4
