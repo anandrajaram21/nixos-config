@@ -19,6 +19,8 @@ in
     settings.gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/${allowedSigners}";
   };
 
+  programs.gh.enable = true;
+
   home.file.${allowedSigners}.text = ''
     ${config.programs.git.settings.user.email} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3HRYS2z4P96ld0XV+yUXIW9qXVbj1BU5zNKAvZz8Iw
   '';
