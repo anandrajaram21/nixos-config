@@ -108,6 +108,11 @@ just check      # nix flake check --no-build --all-systems: evaluates saturn and
 just eval-all   # prints both hosts' drvPaths
 ```
 
+Vorssaint's settings are pinned in `modules/home/vorssaint.nix` and reapplied
+at every app launch. To keep a change made in its UI, run `just vorssaint-sync`
+(quits the app, exports, rewrites changed values), then `just switch-mercury`
+and relaunch Vorssaint.
+
 Without `--all-systems`, `nix flake check` only checks hosts for the machine's
 own platform. Dropping `--no-build` builds them, which only works for that
 platform.
