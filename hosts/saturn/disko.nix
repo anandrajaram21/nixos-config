@@ -1,3 +1,4 @@
+# Scope: Disk layout (disko, NixOS) | Host: saturn
 # Running disko against this file ERASES the disk. Never add the NTFS data HDD here.
 {
   disko.devices.disk.main = {

@@ -1,3 +1,4 @@
+# Scope: Flake entry point | Wires hosts: mercury (nix-darwin), saturn (NixOS)
 {
   description = "altf4's NixOS + Home Manager configuration";
 
@@ -32,11 +33,10 @@
       ...
     }:
     let
-      homeManagerFor = name: {
+      homeManager = {
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.backupFileExtension = "hm-backup";
-        home-manager.users.altf4 = import ./hosts/${name}/home.nix;
       };
       mkNixos =
         name:
@@ -45,8 +45,8 @@
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
-            (homeManagerFor name)
-            ./hosts/${name}/configuration.nix
+            homeManager
+            ./hosts/${name}
           ];
         };
       mkDarwin =
@@ -55,8 +55,8 @@
           modules = [
             sops-nix.darwinModules.sops
             home-manager.darwinModules.home-manager
-            (homeManagerFor name)
-            ./hosts/${name}/configuration.nix
+            homeManager
+            ./hosts/${name}
           ];
         };
       forAllSystems = nixpkgs.lib.genAttrs [

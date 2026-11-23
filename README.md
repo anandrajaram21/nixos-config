@@ -6,8 +6,8 @@ Declarative configuration for my machines, built with
 [flakes](https://nixos.wiki/wiki/Flakes),
 [Home Manager](https://github.com/nix-community/home-manager),
 [nix-darwin](https://github.com/nix-darwin/nix-darwin) and
-[disko](https://github.com/nix-community/disko). Shared settings live in
-`modules/` and `home/` so more hosts can be added.
+[disko](https://github.com/nix-community/disko). Shared settings are flat,
+self-contained bricks in `modules/`, and each host lists the bricks it uses.
 
 | Host | Kind | Platform |
 |---|---|---|
@@ -18,50 +18,38 @@ Declarative configuration for my machines, built with
 
 ```
 .
-├── flake.nix                          # inputs, mkNixos/mkDarwin, hosts, checks, formatter
+├── flake.nix                          # inputs, mkNixos/mkDarwin (embedded Home Manager), hosts, checks, formatter
 ├── flake.lock                         # pinned input revisions
+├── justfile                           # check / eval-all / build / switch / fmt / update recipes
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
 │   └── common.yaml                    # sops-encrypted secrets
-├── modules/
-│   ├── shared/
-│   │   ├── default.nix                # system settings for every host (NixOS and nix-darwin)
-│   │   ├── sops.nix                   # which secrets each host decrypts
-│   │   └── unfree.nix                 # allowedUnfreePackages: unfree packages allowed by name
-│   ├── nixos/default.nix              # system settings for every NixOS host; imports shared/
-│   └── darwin/
-│       ├── default.nix                # system settings for every Mac; imports shared/
-│       └── apps.nix                   # GUI apps from nixpkgs, copied to /Applications/Nix Apps
-├── home/                              # Home Manager config for altf4
-│   ├── default.nix                    # every host: imports shell.nix and git.nix, CLI and dev tools
-│   ├── shell.nix                      # fish, starship, zoxide, direnv, fnm, nvim
-│   ├── git.nix                        # git identity, gh, GitHub SSH key, commit signing
-│   └── darwin.nix                     # every Mac: PATHs, OrbStack, 1Password SSH agent
+├── modules/                           # flat database of bricks; bricks never import each other
+│   ├── system/
+│   │   ├── shared.nix                 # every host (NixOS and nix-darwin): unfree list, sops, nix, fish
+│   │   ├── nixos-base.nix             # every NixOS host: boot, nix gc, user, tailscale, base packages
+│   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew, 1Password
+│   │   ├── server.nix                 # headless servers: OpenSSH
+│   │   ├── nvidia.nix                 # NVIDIA driver + PRIME offload; defaults suit Turing and newer
+│   │   └── mac-apps.nix               # Mac GUI apps from nixpkgs, plus Homebrew and App Store apps
+│   └── home/
+│       ├── dev.nix                    # every host: CLI/dev tools, fish, starship, zoxide, direnv, nvim, git, gh
+│       └── mac-user.nix               # every Mac: PATHs, OrbStack, 1Password SSH agent
 ├── hosts/
-│   ├── mercury/
-│   │   ├── configuration.nix          # hostname, stateVersion, imports
-│   │   ├── homebrew.nix               # what nixpkgs can't provide: Homebrew and App Store apps
-│   │   └── home.nix                   # imports home/ and home/darwin.nix
+│   ├── mercury/default.nix            # imports + hostname, stateVersions
 │   └── saturn/
-│       ├── configuration.nix          # host-only system config (hostname, keys, mounts)
-│       ├── home.nix                   # imports home/, sets home.stateVersion
+│       ├── default.nix                # imports + GTX 1060 overrides, keys, mounts, stateVersions
 │       ├── hardware-configuration.nix # generated with --no-filesystems
-│       ├── disko.nix                  # SSD partition layout (also generates fileSystems)
-│       └── nvidia.nix                 # NVIDIA driver module
+│       └── disko.nix                  # SSD partition layout (also generates fileSystems)
 ├── assets/icon.svg
-└── AGENTS.md                          # notes for AI coding agents
+└── AGENTS.md                          # notes for AI coding agents (CLAUDE.md links here)
 ```
 
-Put each setting in the most general place where it's valid:
-
-- `modules/shared/`: every host, using only options nix-darwin also has.
-- `modules/nixos/` or `modules/darwin/`: every host on that platform.
-- `home/`: every host's Home Manager config. `home/darwin.nix` is for Macs only.
-- `hosts/<host>/`: that machine only. Its `configuration.nix` imports
-  `modules/nixos` or `modules/darwin`, and its `home.nix` imports `home/`.
-
-A self-contained feature goes in its own file (like `nvidia.nix`), imported
-where it's needed.
+Each host's `default.nix` is its explicit list of system bricks (`imports`)
+and Home Manager bricks (`home-manager.users.altf4.imports`), plus anything
+specific to that machine. Put each setting in the most general brick where
+it's valid. Machine-specific hardware and overrides stay in the host file.
+`AGENTS.md` has a full "where to put things" table.
 
 | Input | Tracks | Why |
 |---|---|---|
@@ -115,8 +103,9 @@ or Nix reports that the path doesn't exist.
 Before committing, format and check that every host still evaluates:
 
 ```bash
-nix fmt
-nix flake check --no-build --all-systems   # evaluates saturn and mercury
+just fmt        # nix fmt
+just check      # nix flake check --no-build --all-systems: evaluates saturn and mercury
+just eval-all   # prints both hosts' drvPaths
 ```
 
 Without `--all-systems`, `nix flake check` only checks hosts for the machine's
@@ -169,7 +158,7 @@ console, `sudo` on the console, systemd units and Nix builds (they open a pty).
 
 - **Installed system:** `boot.kernelParams = [ "nouveau.runpm=0" ]` stops the
   GPU from runtime-suspending at all. It's only set when nouveau is in use,
-  i.e. when `nvidia.nix` isn't imported.
+  i.e. when `modules/system/nvidia.nix` isn't imported.
 - **Installer:** while the console is still visible, run
   `echo on | sudo tee /sys/bus/pci/devices/0000:01:00.0/power/control`
   before switching inputs or running anything that probes PCI devices (`lspci`).
@@ -184,16 +173,17 @@ faster edge.
 
 ## NVIDIA driver: saturn
 
-`hosts/saturn/nvidia.nix` is imported from `configuration.nix` and replaces
-nouveau. After a rebuild (which builds the kernel module locally), reboot and
-check with `nvidia-smi`.
+`modules/system/nvidia.nix` is imported from `hosts/saturn/default.nix` and
+replaces nouveau. After a rebuild (which builds the kernel module locally),
+reboot and check with `nvidia-smi`.
 
-Unfree packages must be listed by name in `allowedUnfreePackages`
-(`modules/shared/unfree.nix`). `nvidia.nix` lists the driver's; add others
+Unfree packages must be listed by name in `allowedUnfreePackages` (defined
+in `modules/system/shared.nix`). `nvidia.nix` lists the driver's; add others
 there (e.g. CUDA) when needed.
 
-The module uses the proprietary kernel modules (`open = false`) and the
-`legacy_580` driver. Pascal needs both: the open modules need Turing or newer,
+The brick defaults to the open kernel modules and the `stable` driver, which
+suit Turing and newer. saturn overrides both in `hosts/saturn/default.nix`
+with the proprietary modules (`open = false`) and the `legacy_580` driver. Pascal needs both: the open modules need Turing or newer,
 and 580 is the last driver series that supports Pascal. CUDA 13 also dropped
 Pascal, so CUDA workloads such as Ollama need a CUDA 12 build.
 
@@ -228,7 +218,7 @@ On a fresh macOS install:
 Home Manager owns fish, git, ssh and starship on mercury. yadm still holds
 other dotfiles (Ghostty, OpenCode, Claude, ...), but must not track
 `.config/fish/config.fish` or `.config/fish/conf.d/{fnm,uv}.fish`, and its
-Homebrew and shell bootstrap scripts are replaced by `hosts/mercury/`.
+Homebrew and shell bootstrap scripts are replaced by this repo.
 
 ### Everyday use
 
@@ -243,13 +233,14 @@ sudo darwin-rebuild switch --rollback
 Prefer nixpkgs, and use Homebrew only for what nixpkgs lacks or can't run
 well:
 
-- CLI tools go in `home/default.nix` (every host) or `home/darwin.nix`
-  (Mac-only).
-- GUI apps go in `modules/darwin/apps.nix`, with unfree ones added to
+- CLI tools go in `modules/home/dev.nix` (every host) or
+  `modules/home/mac-user.nix` (Mac-only).
+- GUI apps go in `modules/system/mac-apps.nix`, with unfree ones added to
   `allowedUnfreePackages` there.
-- Homebrew (`hosts/mercury/homebrew.nix`) is for the rest. Right now that's
-  apps missing from nixpkgs, 1Password (in `modules/darwin`, since every
-  Mac's SSH uses its agent, and it must live directly in `/Applications`),
+- Homebrew (also `modules/system/mac-apps.nix`) is for the rest. Right now
+  that's apps missing from nixpkgs, 1Password (in
+  `modules/system/darwin-base.nix`, since every Mac's SSH uses its agent, and
+  it must live directly in `/Applications`),
   `opencode` (not in the binary cache for darwin, so it
   would build from source), and `mas` for App Store installs.
 
@@ -281,15 +272,15 @@ Secrets are split by who needs them:
 | `secrets/common.yaml` | `altf4` and every NixOS host | Secrets every host uses |
 | `secrets/<host>.yaml` | `altf4` and that host | Secrets only that host uses |
 
-`modules/shared/sops.nix` declares the common secrets. A host-only secret goes
-in that host's directory with `sopsFile = ../../secrets/<host>.yaml;`.
+`modules/system/shared.nix` declares the common secrets. A host-only secret
+goes in `hosts/<host>/default.nix` with `sopsFile = ../../secrets/<host>.yaml;`.
 
 | Secret | File | Used for |
 |---|---|---|
 | `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
 
 ```bash
-# Edit secrets (on a Mac; home/darwin.nix installs sops and age)
+# Edit secrets (on a Mac; modules/home/mac-user.nix installs sops and age)
 sops secrets/common.yaml
 
 # After adding a host or key to .sops.yaml, re-encrypt for the new recipients
@@ -304,17 +295,22 @@ host key, so update its entry the same way before rebuilding.
 
 ## Adding another host
 
-1. Create `hosts/<name>/configuration.nix` that imports `../../modules/nixos`
-   or `../../modules/darwin` and sets `system.stateVersion`. For NixOS, add
-   `hardware-configuration.nix` (from `nixos-generate-config
-   --no-filesystems`) and `disko.nix` (point `device` at that machine's
-   `/dev/disk/by-id/...`). For a Mac, set `nixpkgs.hostPlatform`.
-2. Create `hosts/<name>/home.nix` that imports `../../home` (and
-   `../../home/darwin.nix` on a Mac) and sets `home.stateVersion`.
-3. Add `nixosConfigurations.<name> = mkNixos "<name>";` or
+`AGENTS.md` has the full checklist. In short:
+
+1. Create `hosts/<name>/default.nix` that imports
+   `../../modules/system/shared.nix`, the platform base
+   (`nixos-base.nix` or `darwin-base.nix`) and any other bricks. Set
+   `system.stateVersion`, and set `home-manager.users.altf4` to import
+   `../../modules/home/dev.nix` (plus `mac-user.nix` on a Mac) and set
+   `home.stateVersion`. For NixOS, add `hardware-configuration.nix` (from
+   `nixos-generate-config --no-filesystems`) and `disko.nix` (point `device`
+   at that machine's `/dev/disk/by-id/...`). For a Mac, set
+   `nixpkgs.hostPlatform`.
+2. Add `nixosConfigurations.<name> = mkNixos "<name>";` or
    `darwinConfigurations.<name> = mkDarwin "<name>";` in `flake.nix`. `nix
-   flake check` picks it up automatically.
-4. For a NixOS host, add its age key to `.sops.yaml` (see Secrets).
+   flake check` picks it up automatically. Add it to `eval-all` in the
+   `justfile`.
+3. For a NixOS host, add its age key to `.sops.yaml` (see Secrets).
 
 If Home Manager would overwrite an existing file in your home directory, it
 moves it aside to `<file>.hm-backup` instead of failing.

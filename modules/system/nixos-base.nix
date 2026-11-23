@@ -1,8 +1,7 @@
+# Scope: NixOS system (any NixOS host, server or desktop) | Used by: saturn
 { pkgs, ... }:
 
 {
-  imports = [ ../shared ];
-
   nix.settings.trusted-users = [ "@wheel" ];
   nix.gc = {
     automatic = true;
@@ -34,14 +33,6 @@
 
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
-  };
 
   environment.systemPackages = with pkgs; [
     git

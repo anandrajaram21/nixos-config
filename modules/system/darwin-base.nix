@@ -1,11 +1,7 @@
+# Scope: nix-darwin system (any Mac) | Used by: mercury
 { pkgs, ... }:
 
 {
-  imports = [
-    ../shared
-    ./apps.nix
-  ];
-
   system.primaryUser = "altf4";
   users.users.altf4.home = "/Users/altf4";
   environment.shells = [ pkgs.fish ];
@@ -23,6 +19,7 @@
 
   sops.age.keyFile = "/Users/altf4/Library/Application Support/sops/age/keys.txt";
 
+  # 1Password lives here because every Mac's SSH uses its agent (see modules/home/mac-user.nix).
   homebrew = {
     enable = true;
     enableFishIntegration = true;
