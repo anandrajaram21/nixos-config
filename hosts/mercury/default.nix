@@ -18,6 +18,7 @@
     imports = [
       ../../modules/home/dev.nix
       ../../modules/home/mac-user.nix
+      ../../modules/home/vorssaint.nix
     ];
 
     # Install release; never change.
