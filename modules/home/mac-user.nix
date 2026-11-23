@@ -1,3 +1,4 @@
+# Scope: Home Manager (macOS only) | Used by: mercury
 { pkgs, ... }:
 
 {

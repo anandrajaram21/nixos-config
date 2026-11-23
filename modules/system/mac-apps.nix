@@ -1,3 +1,4 @@
+# Scope: nix-darwin system (Mac GUI apps: nixpkgs first, Homebrew/App Store for the rest) | Used by: mercury
 { pkgs, ... }:
 
 {
@@ -27,4 +28,19 @@
     "vscode"
     "zoom"
   ];
+
+  homebrew = {
+    brews = [
+      "mas"
+      "opencode"
+    ];
+    casks = [
+      "helium-browser"
+      "local"
+      "t3-code"
+      "tablepro"
+      "vorssaint"
+    ];
+    masApps.Velja = 1607635845;
+  };
 }

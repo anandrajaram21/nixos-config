@@ -1,3 +1,4 @@
+# Scope: Host entry point (NixOS) | Host: saturn
 {
   config,
   lib,
@@ -9,8 +10,10 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
-    ./nvidia.nix
-    ../../modules/nixos
+    ../../modules/system/shared.nix
+    ../../modules/system/nixos-base.nix
+    ../../modules/system/server.nix
+    ../../modules/system/nvidia.nix
   ];
 
   # nouveau deadlocks when waking the GPU from runtime suspend.
@@ -19,6 +22,17 @@
   ];
 
   hardware.enableRedistributableFirmware = true;
+
+  # GTX 1060 is Pascal: no open modules, and 580 is the last series that supports it.
+  hardware.nvidia = {
+    open = false;
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+    nvidiaPersistenced = true;
+    prime = {
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
 
   networking.hostName = "saturn";
 
@@ -44,4 +58,11 @@
 
   # Install release; never change.
   system.stateVersion = "26.05";
+
+  home-manager.users.altf4 = {
+    imports = [ ../../modules/home/dev.nix ];
+
+    # Install release; never change.
+    home.stateVersion = "26.05";
+  };
 }
