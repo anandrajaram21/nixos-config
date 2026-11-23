@@ -28,6 +28,7 @@ in
     uv
     php
     phpPackages.composer
+    opencode
   ];
 
   programs.fish = {
@@ -36,7 +37,10 @@ in
       set fish_greeting
       fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
     '';
-    shellAliases.ls = "eza -lah";
+    shellAliases = {
+      ls = "eza -lah";
+      oc = "opencode";
+    };
   };
   programs.starship.enable = true;
   programs.zoxide = {

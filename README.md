@@ -240,9 +240,8 @@ well:
 - Homebrew (also `modules/system/mac-apps.nix`) is for the rest. Right now
   that's apps missing from nixpkgs, 1Password (in
   `modules/system/darwin-base.nix`, since every Mac's SSH uses its agent, and
-  it must live directly in `/Applications`),
-  `opencode` (not in the binary cache for darwin, so it
-  would build from source), and `mas` for App Store installs.
+  it must live directly in `/Applications`), and `mas` for App Store
+  installs.
 
 Before moving a package to nixpkgs, check it's in cache.nixos.org for
 `aarch64-darwin`, or is an unfree app that nixpkgs just repackages (those

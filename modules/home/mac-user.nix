@@ -20,7 +20,6 @@
   ];
 
   programs.fish = {
-    shellAliases.oc = "opencode";
     interactiveShellInit = ''
       source ~/.orbstack/shell/init2.fish 2>/dev/null; or true
       if test -d /opt/homebrew/opt/mysql-client/bin

@@ -32,7 +32,6 @@
   homebrew = {
     brews = [
       "mas"
-      "opencode"
     ];
     casks = [
       "helium-browser"
