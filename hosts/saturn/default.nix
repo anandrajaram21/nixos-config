@@ -11,6 +11,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/system/shared.nix
+    ../../modules/system/fonts.nix
     ../../modules/system/nixos-base.nix
     ../../modules/system/server.nix
     ../../modules/system/nvidia.nix
@@ -66,6 +67,7 @@
       ../../modules/home/dev.nix
       ../../modules/home/claude-code.nix
       ../../modules/home/opencode.nix
+      ../../modules/home/ghostty.nix
       ../../modules/home/t3code.nix
     ];
 
