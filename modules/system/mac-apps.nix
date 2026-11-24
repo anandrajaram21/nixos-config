@@ -9,7 +9,6 @@
     ghostty-bin
     obsidian
     orbstack
-    raycast
     slack
     spotify
     vscode
@@ -22,7 +21,6 @@
     "firefox-bin-unwrapped"
     "obsidian"
     "orbstack"
-    "raycast"
     "slack"
     "spotify"
     "vscode"
@@ -36,6 +34,7 @@
     casks = [
       "helium-browser"
       "local"
+      "raycast"
       "tablepro"
       "vorssaint"
     ];
