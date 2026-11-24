@@ -22,6 +22,11 @@ in
     claude-code
     android-tools
     agent-browser
+    (t3code.override {
+      enableCodex = false;
+      enableGit = false;
+      enableGitHub = false;
+    })
     bun
     pnpm
     uv

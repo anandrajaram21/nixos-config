@@ -36,7 +36,6 @@
     casks = [
       "helium-browser"
       "local"
-      "t3-code"
       "tablepro"
       "vorssaint"
     ];
