@@ -11,6 +11,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/system/shared.nix
+    ../../modules/system/fonts.nix
     ../../modules/system/nixos-base.nix
     ../../modules/system/server.nix
     ../../modules/system/nvidia.nix
@@ -60,7 +61,15 @@
   system.stateVersion = "26.05";
 
   home-manager.users.altf4 = {
-    imports = [ ../../modules/home/dev.nix ];
+    imports = [
+      ../../modules/home/shell.nix
+      ../../modules/home/git.nix
+      ../../modules/home/dev.nix
+      ../../modules/home/claude-code.nix
+      ../../modules/home/opencode.nix
+      ../../modules/home/ghostty.nix
+      ../../modules/home/t3code.nix
+    ];
 
     # Install release; never change.
     home.stateVersion = "26.05";

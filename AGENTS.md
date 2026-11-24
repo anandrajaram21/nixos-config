@@ -50,21 +50,49 @@ Rules:
 - Self-contained features get their own brick (see `nvidia.nix`). Bricks set
   defaults with `lib.mkDefault` where a host might reasonably override them.
 
-## Where to put things
+## Brick catalog
 
-| What | Where |
-|---|---|
-| Option valid on both NixOS and nix-darwin, every host | `modules/system/shared.nix` |
-| Every NixOS host (server or desktop) | `modules/system/nixos-base.nix` |
-| Every Mac | `modules/system/darwin-base.nix` |
-| Headless-server services (sshd, future daemons) | `modules/system/server.nix` |
-| NVIDIA driver boilerplate | `modules/system/nvidia.nix` (host sets bus IDs and per-GPU overrides) |
-| Mac GUI apps (nixpkgs first, else Homebrew cask / `mas`) | `modules/system/mac-apps.nix` |
-| CLI/dev tools, shell, git, editors for every host | `modules/home/dev.nix` |
-| Mac-only user config (PATHs, OrbStack, 1Password agent) | `modules/home/mac-user.nix` |
-| Future Linux desktop / gaming (DE, Steam, ...) | new bricks, e.g. `modules/system/desktop.nix`, `modules/system/gaming.nix`, `modules/home/desktop.nix` |
-| Hardware, mounts, keys, bus IDs, one-host-only settings | `hosts/<name>/default.nix` |
-| Secrets | `secrets/*.yaml` via sops; reference `config.sops.secrets.<name>.path` |
+Every brick in `modules/`. A host is composed by picking rows: system bricks
+go in the host's `imports`, home bricks in `home-manager.users.altf4.imports`.
+"Any" means it evaluates on both NixOS and nix-darwin. Keep this table, the
+bricks' `Used by` headers and the README layout in sync.
+
+| Brick | Platform | Provides | Used by |
+|---|---|---|---|
+| `system/shared.nix` | Any (required) | `allowedUnfreePackages` option, flakes, sops defaults, timezone, fish as login shell | mercury, saturn |
+| `system/fonts.nix` | Any | GeistMono Nerd Font | mercury, saturn |
+| `system/nixos-base.nix` | NixOS (required) | boot, nix gc, user, NetworkManager, Tailscale, nix-ld, base packages | saturn |
+| `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
+| `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
+| `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew, 1Password | mercury |
+| `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
+| `system/mac-apps.nix` | macOS | GUI apps (nixpkgs, Homebrew casks, App Store), `code` on the default PATH | mercury |
+| `home/shell.nix` | Any | fish, starship, zoxide (`cd`), direnv, eza, neovim as `$EDITOR` | mercury, saturn |
+| `home/git.nix` | Any | git + gh, SSH commit signing and GitHub SSH with the sops key | mercury, saturn |
+| `home/dev.nix` | Any | CLI tools, Node (fnm), Python (uv), Bun, pnpm, PHP | mercury, saturn |
+| `home/claude-code.nix` | Any | Claude Code + `settings.json` | mercury, saturn |
+| `home/opencode.nix` | Any | OpenCode + settings, `oc` alias | mercury, saturn |
+| `home/t3code.nix` | Any | T3 Code + settings merged into `~/.t3/userdata` on every switch | mercury, saturn |
+| `home/ghostty.nix` | Any | Ghostty config only (`package = mkDefault null`; a desktop brick or host installs the app) | mercury, saturn |
+| `home/cmux.nix` | macOS (cmux is Mac-only) | cmux config | mercury |
+| `home/mac-user.nix` | macOS | Mac PATHs, OrbStack, 1Password SSH agent, sops/age CLIs | mercury |
+| `home/mac-wallpaper.nix` | macOS | desktop wallpaper from `assets/wallpapers/` | mercury |
+| `home/vorssaint.nix` | macOS | Vorssaint settings, reapplied at app launch | mercury |
+
+## Where to put new things
+
+- Fits an existing brick's "Provides"? Add it there.
+- A new self-contained feature (an app plus its config, a service, a
+  driver)? Make a new brick, add a catalog row, import it from each host
+  that wants it. Prefer one brick per feature over growing a catch-all.
+- Prefer platform-neutral bricks. Put platform-only bits in a separate brick
+  rather than branching on the platform inside one.
+- Hardware, mounts, keys, bus IDs, hostnames and one-host-only settings go in
+  `hosts/<name>/default.nix`.
+- Secrets go in `secrets/*.yaml` via sops; reference
+  `config.sops.secrets.<name>.path`.
+- Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
+  `system/gaming.nix`, `home/desktop.nix` (which could install Ghostty).
 
 Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
 `aarch64-darwin` (e.g. use `firefox-bin`, not `firefox`).
@@ -76,10 +104,12 @@ Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
    at that machine's `/dev/disk/by-id/...`.
 2. Write `hosts/venus/default.nix` with a scope header. List the
    `imports` (`./hardware-configuration.nix`, `./disko.nix`,
-   `../../modules/system/shared.nix`, `nixos-base.nix`, `nvidia.nix`, plus any
-   new desktop/gaming bricks), and set `networking.hostName` and
-   `system.stateVersion`. Set `home-manager.users.altf4 = { imports = [
-   ../../modules/home/dev.nix ]; home.stateVersion = "..."; }`.
+   `../../modules/system/shared.nix`, `nixos-base.nix`, then whatever the
+   brick catalog offers, e.g. `fonts.nix`, `nvidia.nix`, new desktop/gaming
+   bricks), and set `networking.hostName` and `system.stateVersion`. Set
+   `home-manager.users.altf4 = { imports = [ ../../modules/home/shell.nix
+   ../../modules/home/git.nix ../../modules/home/dev.nix ... ];
+   home.stateVersion = "..."; }`.
 3. NVIDIA on an RTX 4060: the brick's defaults (open modules, `stable`
    driver, PRIME offload) already fit. Only set
    `hardware.nvidia.prime.{intelBusId,nvidiaBusId}` (or `amdgpuBusId`).
@@ -88,8 +118,8 @@ Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
    `justfile`.
 5. Add the host's age key to `.sops.yaml` and run
    `sops updatekeys secrets/common.yaml` (see README, Secrets).
-6. Update `Used by` headers in every brick the host imports, the machine
-   table above and the README.
+6. Update `Used by` headers in every brick the host imports, the brick
+   catalog, the machine table above and the README.
 7. `git add` the new files, then run the verification commands below.
 
 ## Verification (after every edit)

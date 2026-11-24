@@ -2,7 +2,9 @@
 {
   imports = [
     ../../modules/system/shared.nix
+    ../../modules/system/fonts.nix
     ../../modules/system/darwin-base.nix
+    ../../modules/system/mac-defaults.nix
     ../../modules/system/mac-apps.nix
   ];
 
@@ -16,8 +18,16 @@
 
   home-manager.users.altf4 = {
     imports = [
+      ../../modules/home/shell.nix
+      ../../modules/home/git.nix
       ../../modules/home/dev.nix
+      ../../modules/home/claude-code.nix
+      ../../modules/home/opencode.nix
+      ../../modules/home/ghostty.nix
+      ../../modules/home/cmux.nix
+      ../../modules/home/t3code.nix
       ../../modules/home/mac-user.nix
+      ../../modules/home/mac-wallpaper.nix
       ../../modules/home/vorssaint.nix
     ];
 

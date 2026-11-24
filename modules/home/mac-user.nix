@@ -1,12 +1,15 @@
 # Scope: Home Manager (macOS only) | Used by: mercury
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   home.packages = with pkgs; [
     sops
     age
-    yadm
   ];
+
+  home.activation.lifeDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p "$HOME/Life/Work" "$HOME/Life/Personal"
+  '';
 
   home.sessionVariables = {
     BUN_INSTALL = "$HOME/.bun";

@@ -25,7 +25,7 @@
     sops.defaultSopsFile = ../../secrets/common.yaml;
     sops.secrets.github_ssh_key.owner = "altf4";
 
-    time.timeZone = "Asia/Kolkata";
+    time.timeZone = "Asia/Calcutta";
 
     programs.fish.enable = true;
     users.users.altf4.shell = pkgs.fish;
