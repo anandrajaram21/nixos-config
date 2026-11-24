@@ -36,6 +36,7 @@
       "local"
       "raycast"
       "tablepro"
+      "tailscale-app"
       "vorssaint"
     ];
     masApps.Velja = 1607635845;
