@@ -26,22 +26,34 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   └── common.yaml                    # sops-encrypted secrets
 ├── modules/                           # flat database of bricks; bricks never import each other
 │   ├── system/
-│   │   ├── shared.nix                 # every host (NixOS and nix-darwin): unfree list, sops, nix, fish
+│   │   ├── shared.nix                 # every host (required): unfree list, sops, nix, timezone, fish
+│   │   ├── fonts.nix                  # every host: GeistMono Nerd Font
 │   │   ├── nixos-base.nix             # every NixOS host: boot, nix gc, user, tailscale, base packages
-│   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew, 1Password
 │   │   ├── server.nix                 # headless servers: OpenSSH
 │   │   ├── nvidia.nix                 # NVIDIA driver + PRIME offload; defaults suit Turing and newer
+│   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew, 1Password
+│   │   ├── mac-defaults.nix           # every Mac: Dock, trackpad, keyboard, menu bar, lock
 │   │   └── mac-apps.nix               # Mac GUI apps from nixpkgs, plus Homebrew and App Store apps
 │   └── home/
-│       ├── dev.nix                    # every host: CLI/dev tools, fish, starship, zoxide, direnv, nvim, git, gh
-│       └── mac-user.nix               # every Mac: PATHs, OrbStack, 1Password SSH agent
+│       ├── shell.nix                  # every host: fish, starship, zoxide, direnv, eza, nvim
+│       ├── git.nix                    # every host: git, gh, SSH signing, GitHub SSH key
+│       ├── dev.nix                    # every host: CLI tools, Node (fnm), Python (uv), Bun, PHP
+│       ├── claude-code.nix            # every host: Claude Code and its settings.json
+│       ├── opencode.nix               # every host: OpenCode and its settings
+│       ├── t3code.nix                 # every host: T3 Code and its settings
+│       ├── ghostty.nix                # every host: Ghostty config (the Mac app is in mac-apps.nix)
+│       ├── cmux.nix                   # Mac: cmux config
+│       ├── mac-user.nix               # Mac: PATHs, OrbStack, 1Password SSH agent
+│       ├── mac-wallpaper.nix          # Mac: desktop wallpaper (assets/wallpapers)
+│       └── vorssaint.nix              # Mac: Vorssaint settings
 ├── hosts/
 │   ├── mercury/default.nix            # imports + hostname, stateVersions
 │   └── saturn/
 │       ├── default.nix                # imports + GTX 1060 overrides, keys, mounts, stateVersions
 │       ├── hardware-configuration.nix # generated with --no-filesystems
 │       └── disko.nix                  # SSD partition layout (also generates fileSystems)
-├── assets/icon.svg
+├── scripts/mac-setup.sh             # fresh-Mac bootstrap: Homebrew, Nix, age key, first switch
+├── assets/                          # icon.svg, wallpapers/
 └── AGENTS.md                          # notes for AI coding agents (CLAUDE.md links here)
 ```
 
@@ -49,7 +61,7 @@ Each host's `default.nix` is its explicit list of system bricks (`imports`)
 and Home Manager bricks (`home-manager.users.altf4.imports`), plus anything
 specific to that machine. Put each setting in the most general brick where
 it's valid. Machine-specific hardware and overrides stay in the host file.
-`AGENTS.md` has a full "where to put things" table.
+`AGENTS.md` has a catalog of every brick and where new things go.
 
 | Input | Tracks | Why |
 |---|---|---|
@@ -199,31 +211,28 @@ handles H.264/HEVC and uses far less power than the dGPU.
 
 ### Fresh setup
 
-On a fresh macOS install:
+On a fresh macOS install, clone this repo over HTTPS and run:
 
-1. Install Nix with the official installer, so nix-darwin manages it:
-   `sh <(curl -L https://nixos.org/nix/install)`.
-2. Install [Homebrew](https://brew.sh). nix-darwin runs `brew bundle` but
-   doesn't install Homebrew itself.
-3. Restore the personal age key to
-   `~/Library/Application Support/sops/age/keys.txt` from its backup. Without
-   it, the GitHub key can't be decrypted and git signing won't work.
-4. Clone this repo (over HTTPS, since the SSH key isn't set up yet) and run
-   the first switch:
+```bash
+./scripts/mac-setup.sh
+```
 
-   ```bash
-   sudo nix --extra-experimental-features "nix-command flakes" \
-     run github:nix-darwin/nix-darwin#darwin-rebuild -- switch --flake .#mercury
-   ```
+`scripts/mac-setup.sh` is safe to re-run; it skips steps already done:
 
-5. Make fish the login shell: `chsh -s /run/current-system/sw/bin/fish`.
-6. Restore the remaining dotfiles with yadm, minus anything this repo now
-   manages (see below).
+1. Installs [Homebrew](https://brew.sh) (nix-darwin runs `brew bundle` but
+   doesn't install Homebrew itself).
+2. Installs Nix with the official installer, so nix-darwin manages it.
+3. Waits for you to download `keys.txt` (the personal age key) from
+   1Password into `~/Downloads`, then moves it to
+   `~/Library/Application Support/sops/age/keys.txt`. Without it, the GitHub
+   key can't be decrypted and git signing won't work.
+4. Installs casks whose `.pkg` installers need `sudo` (Tailscale), since
+   `brew bundle` can't ask for a password during the switch.
+5. Runs the first `darwin-rebuild switch --flake .#mercury` (pass another host name as the
+   first argument to override).
+6. Makes fish the login shell and switches the repo's remote to SSH.
 
-Home Manager owns fish, git, ssh and starship on mercury. yadm still holds
-other dotfiles (Ghostty, OpenCode, Claude, ...), but must not track
-`.config/fish/config.fish` or `.config/fish/conf.d/{fnm,uv}.fish`, and its
-Homebrew and shell bootstrap scripts are replaced by this repo.
+Everything else (apps, dotfiles, macOS preferences) comes from this repo.
 
 ### Everyday use
 
@@ -305,7 +314,8 @@ host key, so update its entry the same way before rebuilding.
    `../../modules/system/shared.nix`, the platform base
    (`nixos-base.nix` or `darwin-base.nix`) and any other bricks. Set
    `system.stateVersion`, and set `home-manager.users.altf4` to import
-   `../../modules/home/dev.nix` (plus `mac-user.nix` on a Mac) and set
+   home bricks (at least `shell.nix`, `git.nix`, `dev.nix`; plus `mac-user.nix`
+   on a Mac; see the brick catalog in `AGENTS.md`) and set
    `home.stateVersion`. For NixOS, add `hardware-configuration.nix` (from
    `nixos-generate-config --no-filesystems`) and `disko.nix` (point `device`
    at that machine's `/dev/disk/by-id/...`). For a Mac, set
