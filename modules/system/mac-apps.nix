@@ -32,6 +32,7 @@
       "mas"
     ];
     casks = [
+      "grok-bot"
       "helium-browser"
       "local"
       "raycast"
