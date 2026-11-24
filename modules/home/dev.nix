@@ -7,6 +7,7 @@
     ripgrep
     fd
     jq
+    just
     tmux
     android-tools
     agent-browser
@@ -26,6 +27,13 @@
       run ${pkgs.fnm}/bin/fnm install --lts \
         && run ${pkgs.fnm}/bin/fnm default lts-latest \
         || warnEcho "fnm: couldn't install Node LTS; run 'fnm install --lts' later"
+    fi
+  '';
+
+  home.activation.installPython = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -z "$(${pkgs.uv}/bin/uv python list --only-installed --output-format json | ${pkgs.jq}/bin/jq '.[]?' 2>/dev/null)" ]; then
+      run ${pkgs.uv}/bin/uv python install --default \
+        || warnEcho "uv: couldn't install Python; run 'uv python install --default' later"
     fi
   '';
 }
