@@ -19,6 +19,8 @@
       ../../modules/home/shell.nix
       ../../modules/home/git.nix
       ../../modules/home/dev.nix
+      ../../modules/home/claude-code.nix
+      ../../modules/home/opencode.nix
       ../../modules/home/mac-user.nix
       ../../modules/home/vorssaint.nix
     ];

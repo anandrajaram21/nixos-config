@@ -8,7 +8,6 @@
     fd
     jq
     tmux
-    claude-code
     android-tools
     agent-browser
     (t3code.override {
@@ -21,13 +20,11 @@
     uv
     php
     phpPackages.composer
-    opencode
   ];
 
   programs.fish.interactiveShellInit = ''
     fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
   '';
-  programs.fish.shellAliases.oc = "opencode";
 
   home.activation.installNodeLts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if ! ${pkgs.fnm}/bin/fnm list | grep -q default; then
