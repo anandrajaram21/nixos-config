@@ -1,20 +1,9 @@
-# Scope: Home Manager (cross-platform: shell, git, CLI dev tools) | Used by: mercury, saturn
-{
-  config,
-  osConfig,
-  pkgs,
-  lib,
-  ...
-}:
+# Scope: Home Manager (CLI dev tools and language runtimes: Node via fnm, Python via uv, Bun, PHP) | Used by: mercury, saturn
+{ pkgs, lib, ... }:
 
-let
-  githubKey = osConfig.sops.secrets.github_ssh_key.path;
-  allowedSigners = ".ssh/allowed_signers";
-in
 {
   home.packages = with pkgs; [
     fnm
-    eza
     ripgrep
     fd
     jq
@@ -35,31 +24,10 @@ in
     opencode
   ];
 
-  programs.fish = {
-    enable = true;
-    interactiveShellInit = ''
-      set fish_greeting
-      fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
-    '';
-    shellAliases = {
-      ls = "eza -lah";
-      oc = "opencode";
-    };
-  };
-  programs.starship.enable = true;
-  programs.zoxide = {
-    enable = true;
-    options = [ "--cmd cd" ];
-  };
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-  };
-  home.sessionVariables.VISUAL = "nvim";
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
+  programs.fish.interactiveShellInit = ''
+    fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
+  '';
+  programs.fish.shellAliases.oc = "opencode";
 
   home.activation.installNodeLts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if ! ${pkgs.fnm}/bin/fnm list | grep -q default; then
@@ -68,34 +36,4 @@ in
         || warnEcho "fnm: couldn't install Node LTS; run 'fnm install --lts' later"
     fi
   '';
-
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "Anand Rajaram";
-      email = "anandrajaram21@gmail.com";
-    };
-    signing = {
-      format = "ssh";
-      key = githubKey;
-      signByDefault = true;
-    };
-    settings.gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/${allowedSigners}";
-  };
-
-  programs.gh.enable = true;
-
-  home.file.${allowedSigners}.text = ''
-    ${config.programs.git.settings.user.email} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3HRYS2z4P96ld0XV+yUXIW9qXVbj1BU5zNKAvZz8Iw
-  '';
-
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    settings."github.com" = {
-      User = "git";
-      IdentityFile = githubKey;
-      IdentitiesOnly = true;
-    };
-  };
 }

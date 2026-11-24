@@ -60,7 +60,11 @@
   system.stateVersion = "26.05";
 
   home-manager.users.altf4 = {
-    imports = [ ../../modules/home/dev.nix ];
+    imports = [
+      ../../modules/home/shell.nix
+      ../../modules/home/git.nix
+      ../../modules/home/dev.nix
+    ];
 
     # Install release; never change.
     home.stateVersion = "26.05";

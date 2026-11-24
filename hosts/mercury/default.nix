@@ -16,6 +16,8 @@
 
   home-manager.users.altf4 = {
     imports = [
+      ../../modules/home/shell.nix
+      ../../modules/home/git.nix
       ../../modules/home/dev.nix
       ../../modules/home/mac-user.nix
       ../../modules/home/vorssaint.nix
