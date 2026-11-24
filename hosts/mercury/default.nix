@@ -4,6 +4,7 @@
     ../../modules/system/shared.nix
     ../../modules/system/fonts.nix
     ../../modules/system/darwin-base.nix
+    ../../modules/system/mac-defaults.nix
     ../../modules/system/mac-apps.nix
   ];
 
