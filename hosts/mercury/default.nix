@@ -21,6 +21,7 @@
       ../../modules/home/dev.nix
       ../../modules/home/claude-code.nix
       ../../modules/home/opencode.nix
+      ../../modules/home/t3code.nix
       ../../modules/home/mac-user.nix
       ../../modules/home/vorssaint.nix
     ];

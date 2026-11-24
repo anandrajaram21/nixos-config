@@ -66,6 +66,7 @@
       ../../modules/home/dev.nix
       ../../modules/home/claude-code.nix
       ../../modules/home/opencode.nix
+      ../../modules/home/t3code.nix
     ];
 
     # Install release; never change.
