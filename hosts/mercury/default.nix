@@ -27,6 +27,7 @@
       ../../modules/home/cmux.nix
       ../../modules/home/t3code.nix
       ../../modules/home/mac-user.nix
+      ../../modules/home/mac-wallpaper.nix
       ../../modules/home/vorssaint.nix
     ];
 
