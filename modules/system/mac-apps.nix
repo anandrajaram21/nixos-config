@@ -5,7 +5,6 @@
   environment.systemPackages = with pkgs; [
     betterdisplay
     cmux
-    firefox-bin
     ghostty-bin
     obsidian
     orbstack
@@ -17,8 +16,6 @@
 
   allowedUnfreePackages = [
     "betterdisplay"
-    "firefox-bin"
-    "firefox-bin-unwrapped"
     "obsidian"
     "orbstack"
     "slack"
