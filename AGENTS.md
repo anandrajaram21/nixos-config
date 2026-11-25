@@ -119,6 +119,9 @@ bricks' `Used by` headers and the README layout in sync.
   `hosts/<name>/default.nix`.
 - Secrets go in `secrets/*.yaml` via sops; reference
   `config.sops.secrets.<name>.path`.
+- Anything Nix can't do (sign-ins, app-only settings, permissions) goes in
+  the README's manual steps for that host. Keep them in sync when adding or
+  removing apps.
 - Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
   `system/gaming.nix`, `home/desktop.nix`. Ghostty on Linux needs the
   `ghostty` package instead of `ghostty-bin`.

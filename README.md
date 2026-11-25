@@ -164,6 +164,15 @@ sudo nixos-enter --root /mnt -c 'passwd altf4'
 # 4. Remove the USB stick and reboot
 ```
 
+After the first boot, over SSH:
+
+1. **Secrets:** the new install has a new SSH host key, so sops can't decrypt
+   yet. Update saturn's age key in `.sops.yaml` and re-encrypt (see
+   [Secrets](#secrets)), then rebuild.
+2. **Tailscale:** run `sudo tailscale up` and open the login link it prints.
+3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code
+   and OpenCode.
+
 Use disko's `--flake` mode as shown. The plain-file mode evaluates against the
 installer's channel and can stall for a long time downloading dependencies.
 
@@ -219,7 +228,9 @@ handles H.264/HEVC and uses far less power than the dGPU.
 
 ### Fresh setup
 
-On a fresh macOS install, clone this repo over HTTPS and run:
+On a fresh macOS install, first sign in to the App Store (`mas` can't sign
+in for you, so Velja won't install otherwise). Then clone this repo over HTTPS
+and run:
 
 ```bash
 ./scripts/mac-setup.sh
@@ -240,7 +251,27 @@ On a fresh macOS install, clone this repo over HTTPS and run:
    first argument to override).
 6. Makes fish the login shell and switches the repo's remote to SSH.
 
-Everything else (apps, dotfiles, macOS preferences) comes from this repo.
+Everything else (apps, dotfiles, macOS preferences) comes from this repo,
+except these manual steps after the first switch:
+
+1. **1Password:** sign in, then turn on Settings → Developer → Use the SSH
+   agent. Every SSH host except GitHub authenticates through it
+   (`modules/home/apps/1password.nix`).
+2. **Tailscale:** open the app and log in.
+3. **GitHub CLI:** run `gh auth login`. Git itself already works over SSH with
+   the sops key; `gh` needs its own token for the API.
+4. **Claude Code, OpenCode, T3 Code:** sign in to each. In T3 Code, also sign
+   in to T3 Connect. If other devices should reach its server, switch its
+   server exposure to network-accessible in the app; that's stored in
+   `~/.t3/userdata/desktop-settings.json` (`serverExposureMode`), which this
+   repo doesn't manage.
+5. **Other apps** (Raycast, Slack, Spotify, Zoom, Obsidian, OrbStack, …):
+   sign in or grant permissions as each one asks on first launch.
+
+T3 Code and Vorssaint settings are pinned in `modules/home/apps/`, and each
+switch writes them back over what's on disk. To keep a change made in T3
+Code's UI, copy it into `modules/home/apps/t3code.nix` (for Vorssaint, run
+`just vorssaint-sync`).
 
 ### Everyday use
 
@@ -268,6 +299,26 @@ Before moving a package to nixpkgs, check it's in cache.nixos.org for
 `aarch64-darwin`, or is an unfree app that nixpkgs just repackages (those
 aren't cached, but only download the vendor's build). For example, plain
 `ghostty` doesn't build on darwin, so the Mac uses `ghostty-bin`.
+
+### App permissions after updates
+
+macOS remembers privacy permissions (Screen Recording, Accessibility,
+Camera, Microphone, …) by an app's code signature. Apps signed by their
+developer keep them across updates. Some nixpkgs apps are only ad-hoc signed:
+currently T3 Code, Obsidian, Spotify and Zoom. After an update, macOS sees
+them as a new app, and the old permission silently stops working even though
+its switch still shows on. Toggling it off and on doesn't fix that. Instead,
+remove the app's entry with the **−** button in System Settings → Privacy &
+Security and grant it again, or reset it from a terminal and relaunch the app:
+
+```bash
+tccutil reset All "org.nixos.T3 Code (Beta)"   # or a single service, e.g. ScreenCapture
+# Another app's bundle ID:
+defaults read "/Applications/Nix Apps/zoom.us.app/Contents/Info.plist" CFBundleIdentifier
+```
+
+Check an app's signature with `codesign -dv "/Applications/Nix Apps/<App>.app"`:
+`Signature=adhoc` means it's affected.
 
 GUI apps from nixpkgs update with `nix flake update`, not through their own
 updaters. Homebrew packages removed from the list stay installed, because
