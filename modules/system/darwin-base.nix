@@ -19,10 +19,8 @@
 
   sops.age.keyFile = "/Users/altf4/Library/Application Support/sops/age/keys.txt";
 
-  # 1Password lives here because every Mac's SSH uses its agent (see modules/home/mac-user.nix).
   homebrew = {
     enable = true;
     enableFishIntegration = true;
-    casks = [ "1password" ];
   };
 }

@@ -20,14 +20,19 @@ unless a build is broken.
 flake.nix                 mkNixos / mkDarwin: inputs' modules + embedded Home Manager + ./hosts/<name>
 hosts/<name>/default.nix  the host's shopping list of modules + hardware and host-only overrides
 modules/system/*.nix      system bricks (NixOS / nix-darwin)
+modules/system/apps/*.nix one brick per app: installs it (nixpkgs, Homebrew cask, App Store)
 modules/home/*.nix        Home Manager bricks for user altf4
+modules/home/apps/*.nix   app config only, paired by name with system/apps/<app>.nix
 ```
 
 Rules:
 
-- **Flat module database.** Each file in `modules/` is a standalone brick.
+- **Module database.** Each file in `modules/` is a standalone brick.
   Modules never import other modules; only `hosts/<name>/default.nix`
   imports modules, and it lists every one explicitly.
+- **Apps are pairs.** `modules/system/apps/<app>.nix` installs one app
+  (and allows it if unfree); `modules/home/apps/<app>.nix`, only when the app
+  has config, configures it and never installs it. A host imports both.
 - **No auto-import magic.** No `builtins.readDir`, `listFilesRecursive` or
   directory loaders. Every import is a literal, greppable path.
 - **System vs. home split.** `modules/system/` holds NixOS/nix-darwin
@@ -64,24 +69,47 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/nixos-base.nix` | NixOS (required) | boot, nix gc, user, NetworkManager, Tailscale, nix-ld, base packages | saturn |
 | `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
-| `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew, 1Password | mercury |
+| `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
-| `system/mac-apps.nix` | macOS | GUI apps (nixpkgs, Homebrew casks, App Store), `code` on the default PATH | mercury |
+| `system/apps/t3code.nix` | Any | T3 Code with T3 Connect enabled | mercury, saturn |
+| `system/apps/obsidian.nix` | Any | Obsidian | mercury |
+| `system/apps/slack.nix` | Any | Slack | mercury |
+| `system/apps/spotify.nix` | Any | Spotify | mercury |
+| `system/apps/zoom.nix` | Any | Zoom | mercury |
+| `system/apps/1password.nix` | macOS | 1Password (cask) | mercury |
+| `system/apps/betterdisplay.nix` | macOS | BetterDisplay | mercury |
+| `system/apps/cmux.nix` | macOS | cmux | mercury |
+| `system/apps/ghostty.nix` | macOS | Ghostty (`ghostty-bin`; nixpkgs `ghostty` is Linux-only) | mercury |
+| `system/apps/grok-bot.nix` | macOS | Grok Bot (cask) | mercury |
+| `system/apps/helium-browser.nix` | macOS | Helium browser (cask) | mercury |
+| `system/apps/local.nix` | macOS | Local (cask) | mercury |
+| `system/apps/orbstack.nix` | macOS | OrbStack | mercury |
+| `system/apps/raycast.nix` | macOS | Raycast (cask) | mercury |
+| `system/apps/tablepro.nix` | macOS | TablePro (cask) | mercury |
+| `system/apps/tailscale-app.nix` | macOS | Tailscale app (cask) | mercury |
+| `system/apps/velja.nix` | macOS | Velja (App Store, via `mas`) | mercury |
+| `system/apps/vorssaint.nix` | macOS | Vorssaint (cask) | mercury |
+| `system/apps/vscode.nix` | macOS | VS Code, `code` on the default PATH | mercury |
 | `home/shell.nix` | Any | fish, starship, zoxide (`cd`), direnv, eza, neovim as `$EDITOR` | mercury, saturn |
 | `home/git.nix` | Any | git + gh, SSH commit signing and GitHub SSH with the sops key | mercury, saturn |
 | `home/dev.nix` | Any | CLI tools, Node (fnm), Python (uv), Bun, pnpm, PHP | mercury, saturn |
 | `home/claude-code.nix` | Any | Claude Code + `settings.json` | mercury, saturn |
 | `home/opencode.nix` | Any | OpenCode + settings, `oc` alias | mercury, saturn |
-| `home/t3code.nix` | Any | T3 Code + settings merged into `~/.t3/userdata` on every switch | mercury, saturn |
-| `home/ghostty.nix` | Any | Ghostty config only (`package = mkDefault null`; a desktop brick or host installs the app) | mercury, saturn |
-| `home/cmux.nix` | macOS (cmux is Mac-only) | cmux config | mercury |
-| `home/mac-user.nix` | macOS | Mac PATHs, OrbStack, 1Password SSH agent, sops/age CLIs | mercury |
+| `home/mac-user.nix` | macOS | Mac PATHs, sops/age CLIs, `~/Life` folders | mercury |
 | `home/mac-wallpaper.nix` | macOS | desktop wallpaper from `assets/wallpapers/` | mercury |
-| `home/vorssaint.nix` | macOS | Vorssaint settings, reapplied at app launch | mercury |
+| `home/apps/t3code.nix` | Any | T3 Code settings merged into `~/.t3/userdata` on every switch | mercury, saturn |
+| `home/apps/ghostty.nix` | Any | Ghostty config (`package = mkDefault null`) | mercury, saturn |
+| `home/apps/1password.nix` | macOS | SSH through the 1Password agent (GitHub excluded) | mercury |
+| `home/apps/orbstack.nix` | macOS | OrbStack fish init and SSH include | mercury |
+| `home/apps/cmux.nix` | macOS | cmux config | mercury |
+| `home/apps/vorssaint.nix` | macOS | Vorssaint settings, reapplied at app launch | mercury |
 
 ## Where to put new things
 
 - Fits an existing brick's "Provides"? Add it there.
+- A GUI app? Add `modules/system/apps/<app>.nix` (and
+  `modules/home/apps/<app>.nix` if it has config), a catalog row each, and
+  import them from each host that wants it.
 - A new self-contained feature (an app plus its config, a service, a
   driver)? Make a new brick, add a catalog row, import it from each host
   that wants it. Prefer one brick per feature over growing a catch-all.
@@ -92,7 +120,8 @@ bricks' `Used by` headers and the README layout in sync.
 - Secrets go in `secrets/*.yaml` via sops; reference
   `config.sops.secrets.<name>.path`.
 - Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
-  `system/gaming.nix`, `home/desktop.nix` (which could install Ghostty).
+  `system/gaming.nix`, `home/desktop.nix`. Ghostty on Linux needs the
+  `ghostty` package instead of `ghostty-bin`.
 
 Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
 `aarch64-darwin` (e.g. use `firefox-bin`, not `firefox`).

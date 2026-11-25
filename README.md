@@ -24,28 +24,36 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
 │   └── common.yaml                    # sops-encrypted secrets
-├── modules/                           # flat database of bricks; bricks never import each other
+├── modules/                           # database of bricks; bricks never import each other
 │   ├── system/
 │   │   ├── shared.nix                 # every host (required): unfree list, sops, nix, timezone, fish
 │   │   ├── fonts.nix                  # every host: GeistMono Nerd Font
 │   │   ├── nixos-base.nix             # every NixOS host: boot, nix gc, user, tailscale, base packages
 │   │   ├── server.nix                 # headless servers: OpenSSH
 │   │   ├── nvidia.nix                 # NVIDIA driver + PRIME offload; defaults suit Turing and newer
-│   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew, 1Password
+│   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew
 │   │   ├── mac-defaults.nix           # every Mac: Dock, trackpad, keyboard, menu bar, lock
-│   │   └── mac-apps.nix               # Mac GUI apps from nixpkgs, plus Homebrew and App Store apps
+│   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
+│   │       ├── t3code.nix             # every host: T3 Code with T3 Connect
+│   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
+│   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
+│   │           helium-browser.nix, local.nix, orbstack.nix, raycast.nix, tablepro.nix,
+│   │           tailscale-app.nix, velja.nix, vorssaint.nix, vscode.nix   # Mac-only
 │   └── home/
 │       ├── shell.nix                  # every host: fish, starship, zoxide, direnv, eza, nvim
 │       ├── git.nix                    # every host: git, gh, SSH signing, GitHub SSH key
 │       ├── dev.nix                    # every host: CLI tools, Node (fnm), Python (uv), Bun, PHP
 │       ├── claude-code.nix            # every host: Claude Code and its settings.json
 │       ├── opencode.nix               # every host: OpenCode and its settings
-│       ├── t3code.nix                 # every host: T3 Code and its settings
-│       ├── ghostty.nix                # every host: Ghostty config (the Mac app is in mac-apps.nix)
-│       ├── cmux.nix                   # Mac: cmux config
-│       ├── mac-user.nix               # Mac: PATHs, OrbStack, 1Password SSH agent
+│       ├── mac-user.nix               # Mac: PATHs, sops/age, ~/Life folders
 │       ├── mac-wallpaper.nix          # Mac: desktop wallpaper (assets/wallpapers)
-│       └── vorssaint.nix              # Mac: Vorssaint settings
+│       └── apps/                      # app config only; the app comes from system/apps/<same name>.nix
+│           ├── t3code.nix             # every host: T3 Code settings
+│           ├── ghostty.nix            # every host: Ghostty config
+│           ├── 1password.nix          # Mac: SSH through the 1Password agent
+│           ├── orbstack.nix           # Mac: OrbStack shell init and SSH config
+│           ├── cmux.nix               # Mac: cmux config
+│           └── vorssaint.nix          # Mac: Vorssaint settings
 ├── hosts/
 │   ├── mercury/default.nix            # imports + hostname, stateVersions
 │   └── saturn/
@@ -120,7 +128,7 @@ just check      # nix flake check --no-build --all-systems: evaluates saturn and
 just eval-all   # prints both hosts' drvPaths
 ```
 
-Vorssaint's settings are pinned in `modules/home/vorssaint.nix` and reapplied
+Vorssaint's settings are pinned in `modules/home/apps/vorssaint.nix` and reapplied
 at every app launch. To keep a change made in its UI, run `just vorssaint-sync`
 (quits the app, exports, rewrites changed values), then `just switch-mercury`
 and relaunch Vorssaint.
@@ -249,18 +257,17 @@ well:
 
 - CLI tools go in `modules/home/dev.nix` (every host) or
   `modules/home/mac-user.nix` (Mac-only).
-- GUI apps go in `modules/system/mac-apps.nix`, with unfree ones added to
-  `allowedUnfreePackages` there.
-- Homebrew (also `modules/system/mac-apps.nix`) is for the rest. Right now
-  that's apps missing from nixpkgs, 1Password (in
-  `modules/system/darwin-base.nix`, since every Mac's SSH uses its agent, and
-  it must live directly in `/Applications`), and `mas` for App Store
-  installs.
+- Each GUI app gets its own brick in `modules/system/apps/`, which installs it
+  (from nixpkgs, adding unfree ones to `allowedUnfreePackages` there, or as a
+  Homebrew cask or App Store app), and is imported from the host. If the app
+  has config, it goes in a brick of the same name in `modules/home/apps/`.
+- Homebrew is for apps missing from nixpkgs or that must live directly in
+  `/Applications` (like 1Password), and `mas` for App Store installs.
 
 Before moving a package to nixpkgs, check it's in cache.nixos.org for
 `aarch64-darwin`, or is an unfree app that nixpkgs just repackages (those
 aren't cached, but only download the vendor's build). For example, plain
-`firefox` would compile from source on darwin, so use `firefox-bin`.
+`ghostty` doesn't build on darwin, so the Mac uses `ghostty-bin`.
 
 GUI apps from nixpkgs update with `nix flake update`, not through their own
 updaters. Homebrew packages removed from the list stay installed, because

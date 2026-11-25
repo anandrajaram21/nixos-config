@@ -31,10 +31,10 @@ dry-build-saturn:
 switch-saturn:
     sudo nixos-rebuild switch --flake .#saturn
 
-# Quit Vorssaint, export its settings and copy changed values into modules/home/vorssaint.nix
+# Quit Vorssaint, export its settings and copy changed values into modules/home/apps/vorssaint.nix
 vorssaint-sync:
     python3 -I scripts/vorssaint-sync.py
-    git diff --stat -- modules/home/vorssaint.nix
+    git diff --stat -- modules/home/apps/vorssaint.nix
 
 # Format every .nix file with the flake's formatter (nixfmt-tree)
 fmt:

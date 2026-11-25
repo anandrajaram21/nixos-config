@@ -15,6 +15,7 @@
     ../../modules/system/nixos-base.nix
     ../../modules/system/server.nix
     ../../modules/system/nvidia.nix
+    ../../modules/system/apps/t3code.nix
   ];
 
   # nouveau deadlocks when waking the GPU from runtime suspend.
@@ -67,8 +68,8 @@
       ../../modules/home/dev.nix
       ../../modules/home/claude-code.nix
       ../../modules/home/opencode.nix
-      ../../modules/home/ghostty.nix
-      ../../modules/home/t3code.nix
+      ../../modules/home/apps/ghostty.nix
+      ../../modules/home/apps/t3code.nix
     ];
 
     # Install release; never change.

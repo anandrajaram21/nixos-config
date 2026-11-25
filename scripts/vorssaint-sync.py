@@ -1,4 +1,4 @@
-"""Copy Vorssaint's current UI settings into modules/home/vorssaint.nix.
+"""Copy Vorssaint's current UI settings into modules/home/apps/vorssaint.nix.
 
 Quits Vorssaint, exports its settings, and rewrites the value of every key
 already in `vorssaintSettings`. Keys are never added or removed; new keys in
@@ -15,7 +15,7 @@ import time
 
 APP = "/Applications/Vorssaint.app/Contents/MacOS/Vorssaint"
 EXPORT = "/tmp/vorssaint-export.plist"
-MODULE = os.path.join(os.path.dirname(__file__), "..", "modules", "home", "vorssaint.nix")
+MODULE = os.path.join(os.path.dirname(__file__), "..", "modules", "home", "apps", "vorssaint.nix")
 ENTRY = re.compile(r'^    ("(?:[^"\\]|\\.)*"|[A-Za-z_][A-Za-z0-9_\'-]*) = ')
 
 

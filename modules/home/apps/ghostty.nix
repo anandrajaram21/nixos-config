@@ -4,7 +4,7 @@
 {
   programs.ghostty = {
     enable = true;
-    # Config only; the app comes from mac-apps.nix (ghostty-bin) or a host/desktop brick.
+    # Config only; the app comes from system/apps/ghostty.nix or a desktop brick.
     package = lib.mkDefault null;
     systemd.enable = lib.mkDefault false;
     settings = {
