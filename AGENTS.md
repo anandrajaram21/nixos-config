@@ -124,7 +124,7 @@ bricks' `Used by` headers and the README layout in sync.
   `ghostty` package instead of `ghostty-bin`.
 
 Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
-`aarch64-darwin` (e.g. use `firefox-bin`, not `firefox`).
+`aarch64-darwin` (e.g. the Mac uses `ghostty-bin`; plain `ghostty` doesn't build there).
 
 ## Adding a host (e.g. `venus`)
 
