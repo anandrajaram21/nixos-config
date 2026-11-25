@@ -4,6 +4,24 @@
 let
   serverSettings = {
     idleCompaction = "onReturn";
+    branchNamingMode = "semantic";
+    favorites = [
+      {
+        provider = "claudeAgent";
+        model = "claude-opus-5-5";
+      }
+      {
+        provider = "claudeAgent";
+        model = "claude-sonnet-5-5";
+      }
+    ];
+    storageCleanup = {
+      worktreeAfterDays = 2;
+      worktreeSettledAfterDays = 2;
+      worktreeOnMerge = true;
+      worktreeOnDelete = true;
+      worktreeUnchanged = true;
+    };
     providerInstances = {
       opencode = {
         driver = "opencode";
