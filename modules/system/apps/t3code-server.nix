@@ -1,5 +1,5 @@
-# Scope: NixOS system (T3 Code server `t3`, official prebuilt release with T3 Connect) | Used by: saturn
-{ pkgs, ... }:
+# Scope: NixOS system (T3 Code server `t3`, official prebuilt release with T3 Connect, as a boot service) | Used by: saturn
+{ pkgs, lib, ... }:
 
 let
   version = "0.1.12";
@@ -23,4 +23,23 @@ in
 {
   programs.nix-ld.enable = true;
   environment.systemPackages = [ t3 ];
+
+  systemd.services.t3code = {
+    description = "T3 Code server";
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    environment = {
+      HOME = "/home/altf4";
+      PATH = lib.mkForce "/run/wrappers/bin:/home/altf4/.local/bin:/etc/profiles/per-user/altf4/bin:/run/current-system/sw/bin";
+    };
+    serviceConfig = {
+      User = "altf4";
+      WorkingDirectory = "/home/altf4";
+      ExecStart = "${t3}/bin/t3 serve";
+      Restart = "always";
+      RestartSec = 5;
+      TimeoutStopSec = 90;
+    };
+  };
 }

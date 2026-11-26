@@ -35,7 +35,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │   ├── mac-defaults.nix           # every Mac: Dock, trackpad, keyboard, menu bar, lock
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
-│   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` (official prebuilt release)
+│   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
 │   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
@@ -174,6 +174,9 @@ After the first boot, over SSH:
 2. **Tailscale:** run `sudo tailscale up` and open the login link it prints.
 3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code
    and OpenCode.
+4. **T3 Connect:** run `t3 connect link`, open the URL it prints on any
+   device and enter the code, then `sudo systemctl restart t3code`. The
+   `t3code` service runs the server on boot; `t3 connect status` checks it.
 
 Use disko's `--flake` mode as shown. The plain-file mode evaluates against the
 installer's channel and can stall for a long time downloading dependencies.
