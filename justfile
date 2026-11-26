@@ -19,6 +19,10 @@ build-mercury:
 switch-mercury:
     sudo darwin-rebuild switch --flake .#mercury
 
+# Roll mercury back to the previous generation (run on mercury)
+rollback-mercury:
+    sudo darwin-rebuild switch --rollback
+
 # Build saturn without activating (run on saturn)
 build-saturn:
     nixos-rebuild build --flake .#saturn
@@ -30,6 +34,18 @@ dry-build-saturn:
 # Build and activate saturn (run on saturn)
 switch-saturn:
     sudo nixos-rebuild switch --flake .#saturn
+
+# Build saturn and make it the default on next boot, without activating now (run on saturn)
+boot-saturn:
+    sudo nixos-rebuild boot --flake .#saturn
+
+# Roll saturn back to the previous generation (run on saturn)
+rollback-saturn:
+    sudo nixos-rebuild switch --rollback
+
+# Delete generations and store paths older than 30 days (also runs weekly)
+gc:
+    sudo nix-collect-garbage --delete-older-than 30d
 
 # Copy apps' UI settings into modules/home/apps (all apps, or some: just sync hex)
 sync *apps:

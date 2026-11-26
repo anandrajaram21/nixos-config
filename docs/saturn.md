@@ -27,25 +27,15 @@ show on HDMI. The Linux console appears on HDMI once the kernel loads.
 
 ## Everyday use
 
-Run these on saturn from a clone of this repo (`~/nixos-config`):
+Run these on saturn from a clone of this repo (`~/nixos-config`); `just`
+lists every recipe:
 
 ```bash
-# Apply config changes
-sudo nixos-rebuild switch --flake .#saturn
-
-# Build and activate on next boot only
-sudo nixos-rebuild boot --flake .#saturn
-
-# Update all inputs, then rebuild
-nix flake update
-sudo nixos-rebuild switch --flake .#saturn
-
-# Roll back to the previous generation
-sudo nixos-rebuild switch --rollback
-
-# List generations / delete old ones (also runs weekly, keeping 30 days)
-nixos-rebuild list-generations
-sudo nix-collect-garbage --delete-older-than 30d
+just switch-saturn     # apply config changes
+just boot-saturn       # build now, activate on next boot
+just update            # update all inputs (then switch)
+just rollback-saturn   # back to the previous generation
+just gc                # delete generations older than 30 days (also runs weekly)
 ```
 
 Flakes only see files tracked by git. `git add` new files before you rebuild,
@@ -55,18 +45,14 @@ Before committing, format and check that every host still evaluates:
 
 ```bash
 just fmt        # nix fmt
-just check      # nix flake check --no-build --all-systems: evaluates saturn and mercury
+just check      # evaluates saturn and mercury, for both platforms
 just eval-all   # prints both hosts' drvPaths
 ```
 
-Without `--all-systems`, `nix flake check` only checks hosts for the machine's
-own platform. Dropping `--no-build` builds them, which only works for that
-platform.
-
 Every rebuild creates a new generation in the systemd-boot menu (the last 10
 are kept). If a change breaks booting, choose an older generation at boot. On
-saturn you can't see that menu, so either run `sudo nixos-rebuild switch
---rollback` over SSH, or pick the entry for the next boot with
+saturn you can't see that menu, so either run `just rollback-saturn` over
+SSH, or pick the entry for the next boot with
 `sudo bootctl set-oneshot <entry>.conf`.
 
 ## Services

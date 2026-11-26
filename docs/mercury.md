@@ -54,12 +54,14 @@ except these manual steps after the first switch:
 
 ## Everyday use
 
-```bash
-# Apply config changes
-sudo darwin-rebuild switch --flake .#mercury
+`just` lists every recipe:
 
-# Roll back to the previous generation
-sudo darwin-rebuild switch --rollback
+```bash
+just switch-mercury     # apply config changes
+just update             # update all inputs (then switch)
+just rollback-mercury   # back to the previous generation
+just gc                 # delete generations older than 30 days (also runs weekly)
+just sync               # copy app settings changed in their UIs back into the repo
 ```
 
 ## App settings
