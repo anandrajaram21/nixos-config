@@ -40,7 +40,7 @@ Rules:
   `https://<name>.<domain>` on Tailscale. Media services use
   `config.media.dataDir` and group `media` from `services/media.nix`, and
   set `RequiresMountsFor` on it. Bricks only install, run and route a
-  service; app settings are made in its web UI (README, Services: saturn),
+  service; app settings are made in its web UI (`docs/saturn-media-setup.md`),
   so a brick works on any host.
 - **No auto-import magic.** No `builtins.readDir`, `listFilesRecursive` or
   directory loaders. Every import is a literal, greppable path.
@@ -149,7 +149,8 @@ bricks' `Used by` headers and the README layout in sync.
 - Secrets go in `secrets/*.yaml` via sops; reference
   `config.sops.secrets.<name>.path`.
 - Anything Nix can't do (sign-ins, app-only settings, permissions) goes in
-  the README's manual steps for that host. Keep them in sync when adding or
+  the README's manual steps for that host; long step-by-step guides go in
+  `docs/` and the README links to them. Keep them in sync when adding or
   removing apps.
 - Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
   `system/gaming.nix`, `home/desktop.nix`. Ghostty on Linux needs the
