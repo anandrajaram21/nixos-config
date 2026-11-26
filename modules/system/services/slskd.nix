@@ -28,8 +28,17 @@ in
       SLSKD_PASSWORD=${config.sops.placeholder.slskd_web_password}
       SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
     '';
-    restartUnits = [ "slskd.service" ];
   };
+  # Restart on switch when the template or its encrypted secrets change.
+  systemd.services.slskd.restartTriggers = [
+    config.sops.templates."slskd.env".content
+  ]
+  ++ map (s: builtins.hashFile "sha256" config.sops.secrets.${s}.sopsFile) [
+    "soulseek_username"
+    "soulseek_password"
+    "slskd_web_password"
+    "slskd_api_key"
+  ];
 
   systemd.services.slskd.unitConfig.RequiresMountsFor = [ data ];
 

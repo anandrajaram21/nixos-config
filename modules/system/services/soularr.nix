@@ -26,11 +26,18 @@ in
 
   systemd.tmpfiles.rules = [ "d ${state} 0750 1000 media -" ];
   systemd.services.podman-soularr.unitConfig.RequiresMountsFor = [ data ];
+  # Restart on switch when the template or its encrypted secrets change.
+  systemd.services.podman-soularr.restartTriggers = [
+    config.sops.templates."soularr.ini".content
+  ]
+  ++ map (s: builtins.hashFile "sha256" config.sops.secrets.${s}.sopsFile) [
+    "lidarr_api_key"
+    "slskd_api_key"
+  ];
 
   # Lidarr imports the same folder Soularr sees as /downloads.
   sops.templates."soularr.ini" = {
     owner = "altf4";
-    restartUnits = [ "podman-soularr.service" ];
     content = ''
       [Lidarr]
       api_key = ${config.sops.placeholder.lidarr_api_key}

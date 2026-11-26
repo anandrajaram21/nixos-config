@@ -54,8 +54,13 @@ in
     sops.templates."caddy.env" = {
       content = "CF_API_TOKEN=${config.sops.placeholder.cloudflare_api_token}\n";
       owner = "caddy";
-      restartUnits = [ "caddy.service" ];
     };
+
+    # Restart on switch when the template or its encrypted secrets change.
+    systemd.services.caddy.restartTriggers = [
+      config.sops.templates."caddy.env".content
+    ]
+    ++ map (s: builtins.hashFile "sha256" config.sops.secrets.${s}.sopsFile) [ "cloudflare_api_token" ];
 
     networking.firewall.interfaces.tailscale0 = {
       allowedTCPPorts = [
