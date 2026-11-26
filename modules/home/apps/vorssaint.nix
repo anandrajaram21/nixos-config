@@ -28,7 +28,7 @@ let
     brightnessOSDEnabled = false;
     cameraPreviewShortcut = "control+option+command:13";
     cameraPreviewShortcutEnabled = false;
-    clamshellPreferred = false;
+    clamshellPreferred = true;
     cleanerScheduleFrequency = "off";
     cleanerScheduleHour = 9;
     cleanerScheduleMinute = 0;

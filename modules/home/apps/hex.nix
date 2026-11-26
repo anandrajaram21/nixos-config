@@ -258,7 +258,7 @@ let
     raw_dictation_hotkey = null;
     recording_audio_behavior = "do_nothing";
     recording_duck_volume = 0.2;
-    release_microphone_while_idle = false;
+    release_microphone_while_idle = true;
     screenshots = {
       export_folder = null;
       export_size = "original";
