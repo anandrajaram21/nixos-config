@@ -71,6 +71,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
 | `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts: official prebuilt x86_64 release run via nix-ld, plus a `t3code` boot service as altf4 and nixpkgs `cloudflared` as its T3 Connect relay client (bump `version` + hash to update) | saturn |
 | `system/apps/t3code-appimage.nix` | NixOS | T3 Code desktop app with T3 Connect, for GUI hosts (official prebuilt x86_64 AppImage; bump `version` + hash to update) | none yet (planned: venus) |
+| `system/apps/grok-build.nix` | Any | Grok Build, xAI's coding agent CLI (`grok`) | mercury, saturn |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |

@@ -37,6 +37,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
 │   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
+│   │       ├── grok-build.nix         # every host: Grok Build CLI (`grok`)
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
 │   │           helium-browser.nix, hex.nix, local.nix, orbstack.nix, raycast.nix,
@@ -174,8 +175,8 @@ After the first boot, over SSH:
    yet. Update saturn's age key in `.sops.yaml` and re-encrypt (see
    [Secrets](#secrets)), then rebuild.
 2. **Tailscale:** run `sudo tailscale up` and open the login link it prints.
-3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code
-   and OpenCode.
+3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code,
+   OpenCode and Grok Build (`grok`).
 4. **T3 Connect:** run `t3 connect link`, open the URL it prints on any
    device and enter the code, then `sudo systemctl restart t3code`. The
    `t3code` service runs the server on boot; `t3 connect status` checks it.
@@ -267,7 +268,7 @@ except these manual steps after the first switch:
 2. **Tailscale:** open the app and log in.
 3. **GitHub CLI:** run `gh auth login`. Git itself already works over SSH with
    the sops key; `gh` needs its own token for the API.
-4. **Claude Code, OpenCode, T3 Code:** sign in to each. In T3 Code, also sign
+4. **Claude Code, OpenCode, Grok Build, T3 Code:** sign in to each. In T3 Code, also sign
    in to T3 Connect. If other devices should reach its server, switch its
    server exposure to network-accessible in the app; that's stored in
    `~/.t3/userdata/desktop-settings.json` (`serverExposureMode`), which this

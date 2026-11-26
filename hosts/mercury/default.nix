@@ -10,6 +10,7 @@
     ../../modules/system/apps/cmux.nix
     ../../modules/system/apps/ghostty.nix
     ../../modules/system/apps/grok-bot.nix
+    ../../modules/system/apps/grok-build.nix
     ../../modules/system/apps/helium-browser.nix
     ../../modules/system/apps/hex.nix
     ../../modules/system/apps/local.nix
