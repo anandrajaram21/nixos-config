@@ -19,10 +19,12 @@ let
     '';
     meta.platforms = [ "x86_64-linux" ];
   };
+  cloudflared = "${pkgs.cloudflared}/bin/cloudflared";
 in
 {
   programs.nix-ld.enable = true;
   environment.systemPackages = [ t3 ];
+  environment.variables.T3CODE_CLOUDFLARED_PATH = cloudflared;
 
   systemd.services.t3code = {
     description = "T3 Code server";
@@ -31,6 +33,7 @@ in
     after = [ "network-online.target" ];
     environment = {
       HOME = "/home/altf4";
+      T3CODE_CLOUDFLARED_PATH = cloudflared;
       PATH = lib.mkForce "/run/wrappers/bin:/home/altf4/.local/bin:/etc/profiles/per-user/altf4/bin:/run/current-system/sw/bin";
     };
     serviceConfig = {

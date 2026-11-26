@@ -69,7 +69,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/nixos-base.nix` | NixOS (required) | boot, nix gc, user, NetworkManager, Tailscale, nix-ld, base packages | saturn |
 | `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
-| `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts: official prebuilt x86_64 release run via nix-ld, plus a `t3code` boot service as altf4 (bump `version` + hash to update) | saturn |
+| `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts: official prebuilt x86_64 release run via nix-ld, plus a `t3code` boot service as altf4 and nixpkgs `cloudflared` as its T3 Connect relay client (bump `version` + hash to update) | saturn |
 | `system/apps/t3code-appimage.nix` | NixOS | T3 Code desktop app with T3 Connect, for GUI hosts (official prebuilt x86_64 AppImage; bump `version` + hash to update) | none yet (planned: venus) |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
