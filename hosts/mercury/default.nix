@@ -17,7 +17,7 @@
     ../../modules/system/apps/raycast.nix
     ../../modules/system/apps/slack.nix
     ../../modules/system/apps/spotify.nix
-    ../../modules/system/apps/t3code.nix
+    ../../modules/system/apps/t3code-cask.nix
     ../../modules/system/apps/tablepro.nix
     ../../modules/system/apps/tailscale-app.nix
     ../../modules/system/apps/velja.nix

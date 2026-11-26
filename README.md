@@ -34,7 +34,8 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew
 │   │   ├── mac-defaults.nix           # every Mac: Dock, trackpad, keyboard, menu bar, lock
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
-│   │       ├── t3code.nix             # every host: T3 Code with T3 Connect
+│   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
+│   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` (official prebuilt release)
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
 │   │           helium-browser.nix, local.nix, orbstack.nix, raycast.nix, tablepro.nix,
@@ -47,7 +48,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │       ├── opencode.nix               # every host: OpenCode and its settings
 │       ├── mac-user.nix               # Mac: PATHs, sops/age, ~/Life folders
 │       ├── mac-wallpaper.nix          # Mac: desktop wallpaper (assets/wallpapers)
-│       └── apps/                      # app config only; the app comes from system/apps/<same name>.nix
+│       └── apps/                      # app config only; the app comes from system/apps/<same name>*.nix
 │           ├── t3code.nix             # every host: T3 Code settings
 │           ├── ghostty.nix            # every host: Ghostty config
 │           ├── 1password.nix          # Mac: SSH through the 1Password agent
@@ -305,16 +306,16 @@ aren't cached, but only download the vendor's build). For example, plain
 macOS remembers privacy permissions (Screen Recording, Accessibility,
 Camera, Microphone, …) by an app's code signature. Apps signed by their
 developer keep them across updates. Some nixpkgs apps are only ad-hoc signed:
-currently T3 Code, Obsidian, Spotify and Zoom. After an update, macOS sees
+currently Obsidian, Spotify and Zoom. After an update, macOS sees
 them as a new app, and the old permission silently stops working even though
 its switch still shows on. Toggling it off and on doesn't fix that. Instead,
 remove the app's entry with the **−** button in System Settings → Privacy &
 Security and grant it again, or reset it from a terminal and relaunch the app:
 
 ```bash
-tccutil reset All "org.nixos.T3 Code (Beta)"   # or a single service, e.g. ScreenCapture
-# Another app's bundle ID:
+# Find the app's bundle ID, then reset it (or a single service, e.g. ScreenCapture):
 defaults read "/Applications/Nix Apps/zoom.us.app/Contents/Info.plist" CFBundleIdentifier
+tccutil reset All <bundle-id>
 ```
 
 Check an app's signature with `codesign -dv "/Applications/Nix Apps/<App>.app"`:

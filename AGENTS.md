@@ -69,15 +69,16 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/nixos-base.nix` | NixOS (required) | boot, nix gc, user, NetworkManager, Tailscale, nix-ld, base packages | saturn |
 | `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
+| `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts (official prebuilt x86_64 release, run via nix-ld; bump `version` + hash to update) | saturn |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
-| `system/apps/t3code.nix` | Any | T3 Code with T3 Connect enabled | mercury, saturn |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |
 | `system/apps/slack.nix` | Any | Slack | mercury |
 | `system/apps/spotify.nix` | Any | Spotify | mercury |
 | `system/apps/zoom.nix` | Any | Zoom | mercury |
 | `system/apps/1password.nix` | macOS | 1Password (cask) | mercury |
 | `system/apps/betterdisplay.nix` | macOS | BetterDisplay | mercury |
+| `system/apps/t3code-cask.nix` | macOS | T3 Code desktop app with T3 Connect (official cask, updates itself) | mercury |
 | `system/apps/cmux.nix` | macOS | cmux | mercury |
 | `system/apps/ghostty.nix` | macOS | Ghostty (`ghostty-bin`; nixpkgs `ghostty` is Linux-only) | mercury |
 | `system/apps/grok-bot.nix` | macOS | Grok Bot (cask) | mercury |

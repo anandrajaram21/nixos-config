@@ -1,4 +1,4 @@
-# Scope: Home Manager (T3 Code settings, merged into its files on every switch; app in system/apps/t3code.nix) | Used by: mercury, saturn
+# Scope: Home Manager (T3 Code settings, merged into its files on every switch; app in system/apps/t3code-cask.nix or t3code-server.nix) | Used by: mercury, saturn
 { pkgs, lib, ... }:
 
 let
