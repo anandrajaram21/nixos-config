@@ -1,6 +1,6 @@
 # Media stack setup (saturn)
 
-[← README](../README.md#services-saturn)
+[← saturn](saturn.md#services)
 
 Nix only installs and runs the services. Everything below is set once in each
 app's web UI and saved under `/var/lib/<app>` on saturn, so it survives

@@ -1,7 +1,9 @@
 # AGENTS.md
 
 Guidance for AI coding agents working in this repo (`CLAUDE.md` is a symlink
-to this file). `README.md` covers installs, secrets and everyday use.
+to this file). `README.md` says what the config has and why it's built this
+way; `docs/` holds every how-to (setup, everyday use, troubleshooting);
+this file holds the rules, the brick catalog and the checklists for agents.
 
 ## Machines
 
@@ -149,9 +151,11 @@ bricks' `Used by` headers and the README layout in sync.
 - Secrets go in `secrets/*.yaml` via sops; reference
   `config.sops.secrets.<name>.path`.
 - Anything Nix can't do (sign-ins, app-only settings, permissions) goes in
-  the README's manual steps for that host; long step-by-step guides go in
-  `docs/` and the README links to them. Keep them in sync when adding or
-  removing apps.
+  that host's guide, `docs/<host>.md`. New how-tos go in `docs/` and get a
+  row in the README's Docs table. The README stays an overview (contents,
+  ideology, layout): no step-by-step instructions there. Keep the README's
+  "What's in it", the docs and this file in sync when adding or removing
+  apps, services or hosts.
 - Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
   `system/gaming.nix`, `home/desktop.nix`. Ghostty on Linux needs the
   `ghostty` package instead of `ghostty-bin`. T3 Code: `t3code-cask.nix` on
@@ -181,9 +185,10 @@ Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
    (`checks` picks it up automatically) and add an `eval-all` line in the
    `justfile`.
 5. Add the host's age key to `.sops.yaml` and run
-   `sops updatekeys secrets/common.yaml` (see README, Secrets).
+   `sops updatekeys secrets/common.yaml` (see `docs/secrets.md`).
 6. Update `Used by` headers in every brick the host imports, the brick
-   catalog, the machine table above and the README.
+   catalog, the machine table above, the README and `docs/` (add
+   `docs/<host>.md`).
 7. `git add` the new files, then run the verification commands below.
 
 ## Verification (after every edit)
