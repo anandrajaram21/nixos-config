@@ -54,7 +54,8 @@ Collect these API keys as you go: Jellyfin, Sonarr, Radarr, Lidarr, slskd.
 ## 2. qBittorrent: `https://qbittorrent.home.anandrajaram.dev`
 
 1. On saturn, get the latest temporary password (each restart prints a new
-   one): `journalctl -u qbittorrent | grep -i password | tail -1`.
+   one): `journalctl -u qbittorrent | grep 'temporary password' | tail -1`;
+   the password is at the end of the line.
 2. Sign in as `admin` with it.
 3. **Tools → Options**, tab by tab, then **Save** at the bottom:
    - **Web UI → Authentication:** set a new username/password. Untick
