@@ -23,7 +23,8 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 ├── justfile                           # check / eval-all / build / switch / fmt / update recipes
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
-│   └── common.yaml                    # sops-encrypted secrets
+│   ├── common.yaml                    # sops-encrypted secrets for every host
+│   └── saturn.yaml                    # saturn only: Cloudflare token, Soulseek login, service API keys
 ├── modules/                           # database of bricks; bricks never import each other
 │   ├── system/
 │   │   ├── shared.nix                 # every host (required): unfree list, sops, nix, timezone, fish
@@ -33,6 +34,12 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │   ├── nvidia.nix                 # NVIDIA driver + PRIME offload; defaults suit Turing and newer
 │   │   ├── darwin-base.nix            # every Mac: primary user, nix gc, sops key, Homebrew
 │   │   ├── mac-defaults.nix           # every Mac: Dock, trackpad, keyboard, menu bar, lock
+│   │   ├── services/                  # NixOS: one brick per server service, each served as <name>.home.<domain>
+│   │   │   ├── caddy.nix              # HTTPS reverse proxy, Tailscale only; defines homeProxy.{domain,routes}
+│   │   │   ├── media.nix              # `media` group and media.dataDir (/data); the host mounts it
+│   │   │   ├── jellyfin.nix           # media server (the host sets NVENC)
+│   │   │   └── qbittorrent.nix, prowlarr.nix, flaresolverr.nix, sonarr.nix, radarr.nix,
+│   │   │       lidarr.nix, bazarr.nix, seerr.nix, slskd.nix, soularr.nix   # download and request stack
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
@@ -62,7 +69,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 ├── hosts/
 │   ├── mercury/default.nix            # imports + hostname, stateVersions
 │   └── saturn/
-│       ├── default.nix                # imports + GTX 1060 overrides, keys, mounts, stateVersions
+│       ├── default.nix                # imports + GTX 1060 overrides, data disk mounts, secrets, stateVersions
 │       ├── hardware-configuration.nix # generated with --no-filesystems
 │       └── disko.nix                  # SSD partition layout (also generates fileSystems)
 ├── scripts/mac-setup.sh             # fresh-Mac bootstrap: Homebrew, Nix, age key, first switch
@@ -148,6 +155,118 @@ saturn you can't see that menu, so either run `sudo nixos-rebuild switch
 --rollback` over SSH, or pick the entry for the next boot with
 `sudo bootctl set-oneshot <entry>.conf`.
 
+## Services: saturn
+
+Each service in `modules/system/services/` gets an HTTPS name,
+`<name>.home.anandrajaram.dev`, reachable only over Tailscale:
+
+```text
+device on tailnet ─▶ <name>.home.<domain> ─(DNS)─▶ saturn's Tailscale IP:443 ─▶ Caddy ─▶ 127.0.0.1:<port>
+```
+
+| Name | Does |
+|---|---|
+| `jellyfin` | Plays the library; NVENC transcoding on the GTX 1060 |
+| `seerr` | Requests for movies and TV |
+| `sonarr`, `radarr`, `lidarr` | TV, movies, music: pick releases and import them into the library |
+| `prowlarr` | Indexers, shared with the three above (FlareSolverr on `localhost:8191` for Cloudflare) |
+| `bazarr` | Subtitles for Sonarr and Radarr |
+| `qbittorrent` | Downloads |
+| `slskd` | Soulseek client; Soularr (no UI) fills Lidarr's wanted albums from it every 5 minutes |
+
+- **DNS:** a Cloudflare `A` record `*.home` → saturn's Tailscale IP
+  (`tailscale ip -4`, currently `100.95.91.64`), DNS only (grey cloud). The
+  `100.x` address only routes inside the tailnet.
+- **HTTPS:** Caddy gets one wildcard certificate through a Cloudflare DNS
+  challenge (`cloudflare_api_token` in `secrets/saturn.yaml`: an "Edit zone
+  DNS" token for this zone only), so nothing needs to be reachable from the
+  internet, and the certificate logs don't list individual service names.
+  Unknown names get no response. Ports 80/443 are open only on `tailscale0`.
+- **Add a service:** a brick in `modules/system/services/` that enables it and
+  sets `homeProxy.routes.<name> = <port>;`, imported by the host. The DNS
+  record and certificate already cover the new name.
+- **Outside Tailscale:** Jellyfin also listens on the LAN at
+  `http://192.168.0.69:8096` (plain HTTP) for the TV; add it there by
+  address, since autodiscovery doesn't work. qBittorrent's peer port 6881
+  (TCP/UDP) and Soulseek's 50300 are open too; they reach the internet only
+  if the router forwards them to 192.168.0.69.
+
+### Storage
+
+The `ScoobyDoo` NTFS disk is mounted once, read-write with ntfs-3g, at
+`/srv/scoobydoo/disk` inside a root-only directory, and exposed twice:
+`/mnt/data` read-only (the whole disk), and `/data` read-write (only its
+`data/` folder, the media tree). Services see only `/data`, and only start
+once it's mounted, so a missing disk can't fill the SSD. Jellyfin's view of
+`/data` is read-only. Files on the disk are owned by altf4 and group `media`
+(group-writable); every media service runs in that group.
+
+```text
+/data/
+├── torrents/{movies,tv,music}     # qBittorrent downloads
+├── slskd/{downloads,incomplete}   # Soulseek downloads
+└── media/{movies,tv,music}        # the library Jellyfin reads
+```
+
+Downloads and the library are on one filesystem, so Sonarr, Radarr and
+Lidarr import with hardlinks: instant, and no space used twice. This follows
+the [TRaSH Guides](https://trash-guides.info/File-and-Folder-Structure/)
+layout, so their guides apply as written. App databases stay on the SSD under
+`/var/lib/<app>`; back that up, it holds every setting.
+
+If Windows left the disk hibernated or unclean, ntfs-3g refuses to mount it
+read-write, and `/mnt/data`, `/data` and the media services stay down. Fix it
+from Windows (full shutdown, not hibernate) rather than forcing the mount.
+
+### First-time setup
+
+After the first switch with these services, in each web UI:
+
+1. **qBittorrent:** sign in as `admin` with the temporary password from
+   `journalctl -u qbittorrent | grep -i password`. In **Options**: set a real
+   Web UI password; **Downloads:** default save path `/data/torrents`,
+   Default Torrent Management Mode **Automatic**; **BitTorrent:** share ratio
+   limit 0, action **Stop** (no seeding); **Connection:** port 6881, UPnP off.
+2. **Prowlarr:** set up authentication. **Settings → Indexers → +**
+   FlareSolverr, host `http://127.0.0.1:8191`, tag `flaresolverr` (add the
+   tag to indexers behind Cloudflare). Add indexers. **Settings → Apps → +**
+   Sonarr, Radarr, Lidarr: Prowlarr server `http://127.0.0.1:9696`, servers
+   `http://127.0.0.1:8989`, `:7878`, `:8686`, with each one's API key. For
+   Lidarr use Add and Remove Only sync, and turn off RSS and automatic search
+   on its indexers, so music comes from Soulseek first.
+3. **Sonarr, Radarr, Lidarr:** set up authentication. **Media Management:**
+   root folder `/data/media/tv`, `/data/media/movies`, `/data/media/music`,
+   hardlinks on; Lidarr's multi-disc track format
+   `{Album Title} ({Release Year})/Disc {medium:00}/...`. **Download
+   Clients:** qBittorrent at `127.0.0.1:8080`, category `tv`, `movies` or
+   `music`, Remove Completed on. **Connect:** Sonarr and Radarr use
+   Emby / Jellyfin (`127.0.0.1:8096`, a Jellyfin API key); Lidarr uses a
+   Webhook (POST
+   `http://127.0.0.1:8096/Items/<music-library-id>/Refresh?Recursive=true&ApiKey=<key>`,
+   on import, upgrade, rename, retag and delete). Lidarr's API key is set
+   from `secrets/saturn.yaml`, because Soularr uses it too.
+4. **Bazarr:** **Settings → Sonarr** (`127.0.0.1:8989`) and **Radarr**
+   (`127.0.0.1:7878`) with their API keys, then languages and providers.
+5. **Jellyfin:** run the wizard, add libraries Movies `/data/media/movies`,
+   Shows `/data/media/tv`, Music `/data/media/music`. Transcoding (NVENC,
+   codecs, tone mapping) is set from Nix. In **Dashboard → Networking**, add
+   `127.0.0.1` to Known Proxies and `192.168.0.0/24` to LAN Networks. Install
+   the **LrcLib** plugin for lyrics, run **Download missing lyrics** daily at
+   03:00 and add a daily 04:00 trigger to **Scan Media Library**. For the
+   Music library, turn on **Prefer non-standard artist tags**.
+6. **Seerr:** choose Jellyfin at `http://127.0.0.1:8096`, sign in with the
+   Jellyfin admin, sync libraries, and add Radarr and Sonarr.
+7. **slskd:** sign in as `altf4` with `slskd_web_password` from
+   `sops -d secrets/saturn.yaml`. The Soulseek login and the API key Soularr
+   uses come from the same file. Soularr's settings are in
+   `modules/system/services/soularr.nix`; watch it with
+   `journalctl -u podman-soularr -f`.
+
+Check from a tailnet device: `dig +short jellyfin.home.anandrajaram.dev`
+returns the Tailscale IP, and `curl -I https://jellyfin.home.anandrajaram.dev`
+answers with a valid certificate. Certificate problems show in
+`journalctl -u caddy`.
+
 ## Fresh install: saturn
 
 From the NixOS minimal ISO, booted in UEFI mode:
@@ -177,7 +296,10 @@ After the first boot, over SSH:
 2. **Tailscale:** run `sudo tailscale up` and open the login link it prints.
 3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code,
    OpenCode and Grok Build (`grok`).
-4. **T3 Connect:** run `t3 connect link`, open the URL it prints on any
+4. **Services:** if saturn's Tailscale IP changed, update the `*.home`
+   record in Cloudflare, then do the service setup in
+   [Services: saturn](#services-saturn).
+5. **T3 Connect:** run `t3 connect link`, open the URL it prints on any
    device and enter the code, then `sudo systemctl restart t3code`. The
    `t3code` service runs the server on boot; `t3 connect status` checks it.
 
@@ -361,6 +483,10 @@ goes in `hosts/<host>/default.nix` with `sopsFile = ../../secrets/<host>.yaml;`.
 | Secret | File | Used for |
 |---|---|---|
 | `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
+| `cloudflare_api_token` | `saturn.yaml` | Caddy's DNS challenge for `*.home.anandrajaram.dev` |
+| `soulseek_username`, `soulseek_password` | `saturn.yaml` | slskd's Soulseek login |
+| `slskd_web_password` | `saturn.yaml` | slskd web UI login (user `altf4`) |
+| `slskd_api_key`, `lidarr_api_key` | `saturn.yaml` | Generated keys Soularr uses for slskd and Lidarr |
 
 ```bash
 # Edit secrets (on a Mac; modules/home/mac-user.nix installs sops and age)

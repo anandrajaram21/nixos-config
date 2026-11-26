@@ -21,6 +21,7 @@ flake.nix                 mkNixos / mkDarwin: inputs' modules + embedded Home Ma
 hosts/<name>/default.nix  the host's shopping list of modules + hardware and host-only overrides
 modules/system/*.nix      system bricks (NixOS / nix-darwin)
 modules/system/apps/*.nix one brick per app: installs it (nixpkgs, Homebrew cask, App Store)
+modules/system/services/*.nix one brick per server service (NixOS), served via Caddy
 modules/home/*.nix        Home Manager bricks for user altf4
 modules/home/apps/*.nix   app config only, paired by name with system/apps/<app>.nix
 ```
@@ -33,6 +34,12 @@ Rules:
 - **Apps are pairs.** `modules/system/apps/<app>.nix` installs one app
   (and allows it if unfree); `modules/home/apps/<app>.nix`, only when the app
   has config, configures it and never installs it. A host imports both.
+- **Services register their own route.** `services/caddy.nix` defines
+  `homeProxy.domain` (set by the host) and `homeProxy.routes`; each service
+  brick sets `homeProxy.routes.<name> = <port>;` and becomes
+  `https://<name>.<domain>` on Tailscale. Media services use
+  `config.media.dataDir` and group `media` from `services/media.nix`, and
+  set `RequiresMountsFor` on it. Their secrets are declared by the host.
 - **No auto-import magic.** No `builtins.readDir`, `listFilesRecursive` or
   directory loaders. Every import is a literal, greppable path.
 - **System vs. home split.** `modules/system/` holds NixOS/nix-darwin
@@ -72,6 +79,19 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts: official prebuilt x86_64 release run via nix-ld, plus a `t3code` boot service as altf4 and nixpkgs `cloudflared` as its T3 Connect relay client (bump `version` + hash to update) | saturn |
 | `system/apps/t3code-appimage.nix` | NixOS | T3 Code desktop app with T3 Connect, for GUI hosts (official prebuilt x86_64 AppImage; bump `version` + hash to update) | none yet (planned: venus) |
 | `system/apps/grok-build.nix` | Any | Grok Build, xAI's coding agent CLI (`grok`) | mercury, saturn |
+| `system/services/caddy.nix` | NixOS | Caddy with the Cloudflare DNS plugin: wildcard cert for `*.<homeProxy.domain>`, routes from `homeProxy.routes`, ports 80/443 on `tailscale0` only; needs secret `cloudflare_api_token` | saturn |
+| `system/services/media.nix` | NixOS | `media` group (gid 2000) and `media.dataDir` (`/data`); the host mounts it | saturn |
+| `system/services/jellyfin.nix` | NixOS | Jellyfin at `jellyfin.<domain>`, library read-only; host sets hardware transcoding | saturn |
+| `system/services/qbittorrent.nix` | NixOS | qBittorrent at `qbittorrent.<domain>`, peer port 6881 open | saturn |
+| `system/services/prowlarr.nix` | NixOS | Prowlarr at `prowlarr.<domain>` | saturn |
+| `system/services/flaresolverr.nix` | NixOS | FlareSolverr on `localhost:8191` (no route) | saturn |
+| `system/services/sonarr.nix` | NixOS | Sonarr at `sonarr.<domain>` | saturn |
+| `system/services/radarr.nix` | NixOS | Radarr at `radarr.<domain>` | saturn |
+| `system/services/lidarr.nix` | NixOS | Lidarr at `lidarr.<domain>`; API key from secret `lidarr_api_key` | saturn |
+| `system/services/bazarr.nix` | NixOS | Bazarr at `bazarr.<domain>` | saturn |
+| `system/services/seerr.nix` | NixOS | Seerr at `seerr.<domain>` | saturn |
+| `system/services/slskd.nix` | NixOS | slskd at `slskd.<domain>`, port 50300 open; secrets `soulseek_username`, `soulseek_password`, `slskd_web_password`, `slskd_api_key` | saturn |
+| `system/services/soularr.nix` | NixOS | Soularr (Podman container, no UI): Lidarr wanted albums from slskd; config rendered from sops | saturn |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |
@@ -120,6 +140,8 @@ bricks' `Used by` headers and the README layout in sync.
   that wants it. Prefer one brick per feature over growing a catch-all.
 - Prefer platform-neutral bricks. Put platform-only bits in a separate brick
   rather than branching on the platform inside one.
+- A server service? Add `modules/system/services/<name>.nix` with its
+  `homeProxy.routes` entry, a catalog row, and import it from the host.
 - Hardware, mounts, keys, bus IDs, hostnames and one-host-only settings go in
   `hosts/<name>/default.nix`.
 - Secrets go in `secrets/*.yaml` via sops; reference
@@ -183,7 +205,12 @@ option values with ordering ignored.
   (UUID `6CA2C4DCA2C4AC40`, currently `sda2`) and it holds irreplaceable data.
   Never add it to `disko.nix`, never format, partition, `wipefs` or `fsck -y`
   it, and never mount it read-write without the owner's explicit approval. It
-  is mounted read-only at `/mnt/data` by UUID with `nofail`.
+  is mounted read-write with ntfs-3g (approved by the owner for the media
+  stack) only at root-only `/srv/scoobydoo/disk`; `/mnt/data` is a
+  read-only bind of the whole disk and `/data` a read-write bind of just its
+  `data/` folder. Never widen what is writable or bind other folders
+  read-write without approval, and never force-mount it if ntfs-3g refuses
+  (hibernated or unclean volume).
 - **disko is destructive.** `--mode destroy,format,mount` (or `disko` /
   `disko-install`) erases every disk in `hosts/*/disko.nix`. Only run it when
   the owner asks for a reinstall. To re-mount an existing install, use
