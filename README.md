@@ -39,8 +39,9 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
-│   │           helium-browser.nix, local.nix, orbstack.nix, raycast.nix, tablepro.nix,
-│   │           tailscale-app.nix, velja.nix, vorssaint.nix, vscode.nix   # Mac-only
+│   │           helium-browser.nix, hex.nix, local.nix, orbstack.nix, raycast.nix,
+│   │           tablepro.nix, tailscale-app.nix, velja.nix, vorssaint.nix,
+│   │           vscode.nix                                           # Mac-only
 │   └── home/
 │       ├── shell.nix                  # every host: fish, starship, zoxide, direnv, eza, nvim
 │       ├── git.nix                    # every host: git, gh, SSH signing, GitHub SSH key
@@ -55,6 +56,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │           ├── 1password.nix          # Mac: SSH through the 1Password agent
 │           ├── orbstack.nix           # Mac: OrbStack shell init and SSH config
 │           ├── cmux.nix               # Mac: cmux config
+│           ├── hex.nix                # Mac: Hex settings
 │           └── vorssaint.nix          # Mac: Vorssaint settings
 ├── hosts/
 │   ├── mercury/default.nix            # imports + hostname, stateVersions
@@ -63,6 +65,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │       ├── hardware-configuration.nix # generated with --no-filesystems
 │       └── disko.nix                  # SSD partition layout (also generates fileSystems)
 ├── scripts/mac-setup.sh             # fresh-Mac bootstrap: Homebrew, Nix, age key, first switch
+├── scripts/sync-settings.py         # `just sync`: copy apps' UI settings back into modules/home/apps
 ├── assets/                          # icon.svg, wallpapers/
 └── AGENTS.md                          # notes for AI coding agents (CLAUDE.md links here)
 ```
@@ -131,9 +134,8 @@ just eval-all   # prints both hosts' drvPaths
 ```
 
 Vorssaint's settings are pinned in `modules/home/apps/vorssaint.nix` and reapplied
-at every app launch. To keep a change made in its UI, run `just vorssaint-sync`
-(quits the app, exports, rewrites changed values), then `just switch-mercury`
-and relaunch Vorssaint.
+at every app launch. To keep a change made in its UI, run `just sync vorssaint`
+(see below), then `just switch-mercury` and relaunch Vorssaint.
 
 Without `--all-systems`, `nix flake check` only checks hosts for the machine's
 own platform. Dropping `--no-build` builds them, which only works for that
@@ -270,13 +272,17 @@ except these manual steps after the first switch:
    server exposure to network-accessible in the app; that's stored in
    `~/.t3/userdata/desktop-settings.json` (`serverExposureMode`), which this
    repo doesn't manage.
-5. **Other apps** (Raycast, Slack, Spotify, Zoom, Obsidian, OrbStack, …):
+5. **Other apps** (Raycast, Hex, Slack, Spotify, Zoom, Obsidian, OrbStack, …):
    sign in or grant permissions as each one asks on first launch.
 
-T3 Code and Vorssaint settings are pinned in `modules/home/apps/`, and each
-switch writes them back over what's on disk. To keep a change made in T3
-Code's UI, copy it into `modules/home/apps/t3code.nix` (for Vorssaint, run
-`just vorssaint-sync`).
+T3 Code, Hex and Vorssaint settings are pinned in `modules/home/apps/`, and
+each switch writes them back over what's on disk. To keep changes made in
+their settings windows, run `just sync` (or `just sync hex` for one app),
+review the diff and commit. It quits Hex and Vorssaint first so they save
+their settings, rewrites only values the repo already pins, and lists
+settings the app has that aren't pinned. To pin another app's settings, add
+it to `APPS` in `scripts/sync-settings.py`. Quit Hex before switching, or it
+may save its in-memory settings over the merged file.
 
 ### Everyday use
 

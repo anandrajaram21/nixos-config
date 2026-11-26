@@ -84,6 +84,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/apps/ghostty.nix` | macOS | Ghostty (`ghostty-bin`; nixpkgs `ghostty` is Linux-only) | mercury |
 | `system/apps/grok-bot.nix` | macOS | Grok Bot (cask) | mercury |
 | `system/apps/helium-browser.nix` | macOS | Helium browser (cask) | mercury |
+| `system/apps/hex.nix` | macOS | Hex voice dictation (cask) | mercury |
 | `system/apps/local.nix` | macOS | Local (cask) | mercury |
 | `system/apps/orbstack.nix` | macOS | OrbStack | mercury |
 | `system/apps/raycast.nix` | macOS | Raycast (cask) | mercury |
@@ -104,6 +105,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `home/apps/1password.nix` | macOS | SSH through the 1Password agent (GitHub excluded) | mercury |
 | `home/apps/orbstack.nix` | macOS | OrbStack fish init and SSH include | mercury |
 | `home/apps/cmux.nix` | macOS | cmux config | mercury |
+| `home/apps/hex.nix` | macOS | Hex settings merged into its `settings.json` on every switch | mercury |
 | `home/apps/vorssaint.nix` | macOS | Vorssaint settings, reapplied at app launch | mercury |
 
 ## Where to put new things
