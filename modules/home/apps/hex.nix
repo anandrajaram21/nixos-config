@@ -1,0 +1,329 @@
+# Scope: Home Manager (Hex settings, merged into its settings.json on every switch; app in system/apps/hex.nix) | Used by: mercury
+{ pkgs, lib, ... }:
+
+let
+  hexSettings = {
+    avoid_bluetooth_microphone = true;
+    cancel_hotkey = {
+      keys = [
+        {
+          code = 53;
+          label = "Esc";
+        }
+      ];
+    };
+    capture = {
+      bundle_days = 30;
+      capsule_flow = "list";
+      enabled = true;
+      folder = null;
+      hotkey = {
+        keys = [
+          {
+            modifier = "option";
+            side = "any";
+          }
+          {
+            modifier = "shift";
+            side = "any";
+          }
+          {
+            code = 1;
+            label = "S";
+          }
+        ];
+      };
+      media_days = 7;
+      replay_hotkey = null;
+      routing = {
+        agentHost = null;
+        agentOpencode = null;
+        aliases = { };
+        apps = { };
+        autoSend = "rules";
+        delivery = "steer";
+        jev = null;
+        jevApiKey = null;
+        jevRouting = false;
+        refusedRules = [ ];
+        sendCaptures = true;
+        servers = { };
+        sites = { };
+        smartRouting = false;
+        terminals = { };
+        undoWindowSec = null;
+      };
+      show_overlays_in_recordings = false;
+      transcriber = "parakeet";
+    };
+    dictation_hotkey = {
+      keys = [
+        {
+          modifier = "option";
+          side = "any";
+        }
+      ];
+    };
+    dictation_processing = {
+      default_mode = {
+        applications = [ ];
+        browser_hosts = [ ];
+        name = "Global";
+        post_processing = {
+          deadline_seconds = 30;
+          enabled = false;
+          model = null;
+          prompt = "Rewrite the transcript into clear, natural text while preserving the speaker's intended meaning.";
+          variant = null;
+        };
+        replacements = [ ];
+        transformations = [ ];
+      };
+      modes = [ ];
+    };
+    double_tap_lock = true;
+    double_tap_only = false;
+    enable_on_launch = true;
+    experimental = {
+      hex_microphone = false;
+      hex_microphone_comfort_noise = true;
+      hex_microphone_mode = "muffled";
+      hex_microphone_strength = 1;
+    };
+    extra_dictation_hotkeys = [ ];
+    gnome_keyboard_shortcuts = false;
+    history_retention = "week";
+    indicator_position = "top";
+    keyboard_model_switching = {
+      enabled = false;
+      mappings = { };
+    };
+    labs = {
+      annotate_agent_install = false;
+      annotate_agent_tools = false;
+      annotate_pointer_screen = false;
+      annotate_replay = false;
+      api_processing = false;
+      api_timestamps = false;
+      app_model_switching = false;
+      appearance = false;
+      appearance_theme = "system";
+      benchmark_details = false;
+      calendar_bulk_select = false;
+      calendar_menu = false;
+      caps_lock_dictation = false;
+      caps_lock_light = "steady";
+      clean_up_with_apple_intelligence = false;
+      clipboard_phrase = false;
+      clipboard_phrase_text = "my clipboard";
+      confirm_long_cancels = false;
+      copy_capture_zip = false;
+      copy_dictation_audio = false;
+      copy_only = false;
+      cursor_context = false;
+      dictate_while_annotating = false;
+      dictation_style = false;
+      dictation_style_choice = "polished";
+      double_tap_modifiers = false;
+      drop_transcribe = false;
+      failure_notices = false;
+      faster_live_text = false;
+      filler_words = false;
+      follow_live_transcript = false;
+      gnome_annotate = false;
+      gnome_clipboard_restore = false;
+      gnome_meeting_capsules = false;
+      hide_menu_bar_icon = false;
+      history_stats = false;
+      history_stats_strip = false;
+      hold_through_keys = false;
+      hud_bottom_gap = 24;
+      hud_height = false;
+      indicator_follows_mouse = false;
+      k_quant_models = false;
+      keep_microphone_open = false;
+      keep_microphone_open_seconds = 60;
+      keep_on_clipboard = false;
+      keep_recordings = false;
+      learn_from_corrections = false;
+      live_chapters = false;
+      live_text = false;
+      live_typing = false;
+      meeting_audio_source = false;
+      meeting_audio_source_choice = "all";
+      meeting_finished_event = false;
+      meeting_import = false;
+      meeting_indicator_display = false;
+      meeting_microphone_mute = false;
+      meeting_notes_vocabulary = false;
+      microphone_key = false;
+      middle_mouse_dictation = false;
+      model_in_place = false;
+      model_switch_shortcut = false;
+      modes_editor = false;
+      more_call_apps = false;
+      more_dictation_shortcuts = false;
+      mouse_shortcuts = false;
+      movable_meeting_capsules = false;
+      neutral_voice = false;
+      notch_indicator = false;
+      opencode_in_wsl = false;
+      output_fixes = false;
+      parakeet_ultra = false;
+      paste_last_picker = false;
+      pause_menu = false;
+      picker_active_first = false;
+      picker_downloaded = false;
+      picker_sort_filter = false;
+      playground = false;
+      quit_closes_window = false;
+      recent_dictations = false;
+      release_notes_link = false;
+      restore_shortcut_default = false;
+      return_to_app = false;
+      screen_vocabulary = false;
+      screenshots = false;
+      second_dictation_shortcut = false;
+      section_key_alone = false;
+      settings_search = false;
+      sided_modifier_chords = false;
+      signature = false;
+      signature_text = "Sent from Hex";
+      skip_pauses = false;
+      smart_spacing = false;
+      speakers_only = false;
+      spoken_formatting = false;
+      spoken_symbols = false;
+      standalone_special_keys = false;
+      stop_any_call_recording = false;
+      stop_phrase = false;
+      stop_phrase_text = "stop dictation";
+      subtitle_export = false;
+      tap_or_hold = false;
+      terminal_paste_shortcut = false;
+      transcribe_files = false;
+      transcript_edits = false;
+      typed_text = false;
+      unload_idle = false;
+      unload_idle_minutes = 15;
+      vocabulary_biasing = false;
+      vocabulary_files = false;
+      vocabulary_menu = false;
+      voice_isolation = false;
+      voice_prompt = false;
+      voice_prompt_phrase = "rewrite this";
+      yolo_mode = false;
+      yolo_mode_apps = [ ];
+    };
+    meetings = {
+      calendar = {
+        excluded_calendars = [ ];
+        lead_minutes = 1;
+        remind = true;
+      };
+      default_policy = "ask";
+      enabled = false;
+      export = {
+        descriptive_filenames = false;
+        notes_file = false;
+      };
+      output_folder = null;
+      providers = [ ];
+      recording_indicator_corner = "top_right";
+      show_recording_indicator = true;
+      stop_when_call_ends = false;
+      summaries = "mac";
+    };
+    microphone = null;
+    model_switch_hotkey = null;
+    model_switch_other = null;
+    paste_last_hotkey = {
+      keys = [
+        {
+          modifier = "option";
+          side = "any";
+        }
+        {
+          modifier = "shift";
+          side = "any";
+        }
+        {
+          code = 9;
+          label = "V";
+        }
+      ];
+    };
+    paste_with_shift = false;
+    pause_browser_media = false;
+    raw_dictation_hotkey = null;
+    recording_audio_behavior = "do_nothing";
+    recording_duck_volume = 0.2;
+    release_microphone_while_idle = false;
+    screenshots = {
+      export_folder = null;
+      export_size = "original";
+      folder = null;
+      frame_rate = 30;
+      hotkey = {
+        keys = [
+          {
+            modifier = "shift";
+            side = "any";
+          }
+          {
+            modifier = "command";
+            side = "any";
+          }
+          {
+            code = 21;
+            label = "4";
+          }
+        ];
+      };
+      max_resolution = "original";
+      quality = "high";
+      record_hotkey = null;
+      record_kind = "area";
+      record_microphone = "default";
+      record_system_audio = false;
+      scale_to_1x = true;
+    };
+    second_dictation_hotkey = null;
+    share_dictation_shortcut = false;
+    shortcut_mode = "hold";
+    show_dock_icon = true;
+    sound_effect_volume = 0.5;
+    sound_effects = true;
+    sound_theme = "classic";
+    terminal_paste_hotkey = null;
+    transcription = {
+      language = "en";
+      model = "parakeet_unified_en";
+    };
+    transcription_device = "auto";
+    typed_text_hotkey = null;
+    typing_wpm = 40;
+    ui_language = null;
+    updates = {
+      channel = null;
+    };
+    vocabulary_boost = "normal";
+  };
+
+  settingsFile = (pkgs.formats.json { }).generate "hex-settings.json" hexSettings;
+in
+{
+  home.activation.hexSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    f="$HOME/Library/Application Support/hex/settings.json"
+    if [[ ! -v DRY_RUN ]]; then
+      mkdir -p "$(dirname "$f")"
+      if [[ -s "$f" ]]; then
+        tmp="$(mktemp)"
+        ${lib.getExe pkgs.jq} -s '.[0] * .[1]' "$f" ${settingsFile} > "$tmp"
+        mv "$tmp" "$f"
+      else
+        install -m 644 ${settingsFile} "$f"
+      fi
+    fi
+  '';
+}

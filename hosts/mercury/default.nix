@@ -11,6 +11,7 @@
     ../../modules/system/apps/ghostty.nix
     ../../modules/system/apps/grok-bot.nix
     ../../modules/system/apps/helium-browser.nix
+    ../../modules/system/apps/hex.nix
     ../../modules/system/apps/local.nix
     ../../modules/system/apps/obsidian.nix
     ../../modules/system/apps/orbstack.nix
@@ -46,6 +47,7 @@
       ../../modules/home/apps/1password.nix
       ../../modules/home/apps/cmux.nix
       ../../modules/home/apps/ghostty.nix
+      ../../modules/home/apps/hex.nix
       ../../modules/home/apps/orbstack.nix
       ../../modules/home/apps/t3code.nix
       ../../modules/home/apps/vorssaint.nix
