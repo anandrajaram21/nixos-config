@@ -70,6 +70,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
 | `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts (official prebuilt x86_64 release, run via nix-ld; bump `version` + hash to update) | saturn |
+| `system/apps/t3code-appimage.nix` | NixOS | T3 Code desktop app with T3 Connect, for GUI hosts (official prebuilt x86_64 AppImage; bump `version` + hash to update) | none yet (planned: venus) |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |
@@ -125,7 +126,9 @@ bricks' `Used by` headers and the README layout in sync.
   removing apps.
 - Future Linux desktop / gaming: new bricks, e.g. `system/desktop.nix`,
   `system/gaming.nix`, `home/desktop.nix`. Ghostty on Linux needs the
-  `ghostty` package instead of `ghostty-bin`.
+  `ghostty` package instead of `ghostty-bin`. T3 Code: `t3code-cask.nix` on
+  Macs, `t3code-appimage.nix` on Linux desktops, `t3code-server.nix` on
+  headless servers; pair each with `home/apps/t3code.nix`.
 
 Before moving a Mac package to nixpkgs, check that cache.nixos.org has it for
 `aarch64-darwin` (e.g. the Mac uses `ghostty-bin`; plain `ghostty` doesn't build there).

@@ -36,6 +36,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` (official prebuilt release)
+│   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
 │   │           helium-browser.nix, local.nix, orbstack.nix, raycast.nix, tablepro.nix,
