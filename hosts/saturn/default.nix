@@ -86,52 +86,10 @@
 
   homeProxy.domain = "home.anandrajaram.dev";
 
-  sops.secrets =
-    lib.genAttrs
-      [
-        "cloudflare_api_token"
-        "soulseek_username"
-        "soulseek_password"
-        "slskd_web_password"
-        "slskd_api_key"
-        "lidarr_api_key"
-      ]
-      (_: {
-        sopsFile = ../../secrets/saturn.yaml;
-      });
+  sops.secrets.cloudflare_api_token.sopsFile = ../../secrets/saturn.yaml;
 
   # Jellyfin on the LAN too, for the TV (plain HTTP).
   networking.firewall.interfaces.enp7s0f1.allowedTCPPorts = [ 8096 ];
-
-  # GTX 1060 (Pascal): NVENC/NVDEC for H.264, HEVC and VP9; no AV1.
-  services.jellyfin = {
-    forceEncodingConfig = true;
-    hardwareAcceleration = {
-      enable = true;
-      type = "nvenc";
-      device = "/dev/nvidia0";
-    };
-    transcoding = {
-      enableHardwareEncoding = true;
-      enableToneMapping = true;
-      hardwareEncodingCodecs.hevc = true;
-      hardwareDecodingCodecs = {
-        h264 = true;
-        hevc = true;
-        mpeg2 = true;
-        vc1 = true;
-        vp8 = true;
-        vp9 = true;
-        hevc10bit = true;
-      };
-    };
-  };
-  systemd.services.jellyfin.serviceConfig.DeviceAllow = [
-    "/dev/nvidiactl rw"
-    "/dev/nvidia-uvm rw"
-    "/dev/nvidia-uvm-tools rw"
-    "/dev/nvidia-modeset rw"
-  ];
 
   users.users.altf4.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"

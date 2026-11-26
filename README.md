@@ -37,7 +37,7 @@ self-contained bricks in `modules/`, and each host lists the bricks it uses.
 │   │   ├── services/                  # NixOS: one brick per server service, each served as <name>.home.<domain>
 │   │   │   ├── caddy.nix              # HTTPS reverse proxy, Tailscale only; defines homeProxy.{domain,routes}
 │   │   │   ├── media.nix              # `media` group and media.dataDir (/data); the host mounts it
-│   │   │   ├── jellyfin.nix           # media server (the host sets NVENC)
+│   │   │   ├── jellyfin.nix           # media server
 │   │   │   └── qbittorrent.nix, prowlarr.nix, flaresolverr.nix, sonarr.nix, radarr.nix,
 │   │   │       lidarr.nix, bazarr.nix, seerr.nix, slskd.nix, soularr.nix   # download and request stack
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
@@ -243,24 +243,96 @@ After the first switch with these services, in each web UI:
    Emby / Jellyfin (`127.0.0.1:8096`, a Jellyfin API key); Lidarr uses a
    Webhook (POST
    `http://127.0.0.1:8096/Items/<music-library-id>/Refresh?Recursive=true&ApiKey=<key>`,
-   on import, upgrade, rename, retag and delete). Lidarr's API key is set
-   from `secrets/saturn.yaml`, because Soularr uses it too.
+   on import, upgrade, rename, retag and delete).
 4. **Bazarr:** **Settings → Sonarr** (`127.0.0.1:8989`) and **Radarr**
    (`127.0.0.1:7878`) with their API keys, then languages and providers.
 5. **Jellyfin:** run the wizard, add libraries Movies `/data/media/movies`,
-   Shows `/data/media/tv`, Music `/data/media/music`. Transcoding (NVENC,
-   codecs, tone mapping) is set from Nix. In **Dashboard → Networking**, add
+   Shows `/data/media/tv`, Music `/data/media/music`. **Dashboard → Playback
+   → Transcoding:** hardware acceleration **Nvidia NVENC**; hardware decoding
+   for H.264, HEVC, MPEG2, VC1, VP8, VP9 and HEVC 10bit (not AV1: Pascal
+   can't); hardware encoding on, HEVC encoding allowed; tone mapping on.
+   **Dashboard → Networking:** published server URL
+   `https://jellyfin.home.anandrajaram.dev`; add
    `127.0.0.1` to Known Proxies and `192.168.0.0/24` to LAN Networks. Install
    the **LrcLib** plugin for lyrics, run **Download missing lyrics** daily at
    03:00 and add a daily 04:00 trigger to **Scan Media Library**. For the
    Music library, turn on **Prefer non-standard artist tags**.
 6. **Seerr:** choose Jellyfin at `http://127.0.0.1:8096`, sign in with the
    Jellyfin admin, sync libraries, and add Radarr and Sonarr.
-7. **slskd:** sign in as `altf4` with `slskd_web_password` from
-   `sops -d secrets/saturn.yaml`. The Soulseek login and the API key Soularr
-   uses come from the same file. Soularr's settings are in
-   `modules/system/services/soularr.nix`; watch it with
-   `journalctl -u podman-soularr -f`.
+7. **slskd:** sign in as `slskd` / `slskd`. Under **System → Options**,
+   edit the YAML: set `soulseek.username` and `soulseek.password` (your
+   Soulseek account; a new name creates one), `web.authentication.username`
+   and `password` (replace the defaults), `directories.downloads`
+   `/data/slskd/downloads` and `directories.incomplete`
+   `/data/slskd/incomplete`, `shares.directories` `[/data/media/music]`, and
+   an API key for Soularr under `web.authentication.api_keys`
+   (`soularr: { key: <random 32+ chars> }`). Save; slskd applies it.
+8. **Soularr** (no UI): write `/var/lib/soularr/config.ini` on saturn
+   (`sudo -u altf4 nano /var/lib/soularr/config.ini`), then
+   `sudo systemctl start podman-soularr`. It doesn't start until that file
+   exists. Fill in Lidarr's API key (Lidarr → Settings → General) and the
+   slskd key from step 7:
+
+   ```ini
+   [Lidarr]
+   api_key = <lidarr api key>
+   host_url = http://127.0.0.1:8686
+   download_dir = /data/slskd/downloads
+   disable_sync = False
+
+   [Slskd]
+   api_key = <slskd api key>
+   host_url = http://127.0.0.1:5030
+   url_base = /
+   download_dir = /downloads
+   delete_searches = False
+   stalled_timeout = 3600
+   remote_queue_timeout = 300
+
+   [Release Settings]
+   use_selected_lidarr_release = False
+   use_most_common_tracknum = True
+   allow_multi_disc = True
+   accepted_countries = Europe,Japan,United Kingdom,United States,[Worldwide],Australia,Canada
+   skip_region_check = False
+   accepted_formats = CD,Digital Media,Vinyl
+
+   [Search Settings]
+   search_timeout = 5000
+   maximum_peer_queue = 50
+   minimum_peer_upload_speed = 0
+   minimum_filename_match_ratio = 0.8
+   minimum_search_interval = 5
+   search_retry_wait_hours = 0
+   allowed_filetypes = flac 16/44.1,flac,mp3 320,mp3
+   ignored_users =
+   album_prepend_artist = True
+   search_type = incrementing_page
+   number_of_albums_to_grab = 10
+   title_blacklist =
+   search_blacklist =
+   search_source = missing
+   failed_import_denylist = True
+   ignore_failed_users = False
+   failed_user_ignore_hours = 168
+
+   [Download Settings]
+   download_filtering = True
+   use_extension_whitelist = False
+   extensions_whitelist = lrc,nfo,txt
+   rename_download_folders = True
+
+   [Logging]
+   level = INFO
+   format = [%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s
+   datefmt = %Y-%m-%dT%H:%M:%S%z
+   log_to_file = True
+   log_file = soularr.log
+   max_bytes = 1048576
+   backup_count = 3
+   ```
+
+   Watch it with `journalctl -u podman-soularr -f`.
 
 Check from a tailnet device: `dig +short jellyfin.home.anandrajaram.dev`
 returns the Tailscale IP, and `curl -I https://jellyfin.home.anandrajaram.dev`
@@ -484,9 +556,6 @@ goes in `hosts/<host>/default.nix` with `sopsFile = ../../secrets/<host>.yaml;`.
 |---|---|---|
 | `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
 | `cloudflare_api_token` | `saturn.yaml` | Caddy's DNS challenge for `*.home.anandrajaram.dev` |
-| `soulseek_username`, `soulseek_password` | `saturn.yaml` | slskd's Soulseek login |
-| `slskd_web_password` | `saturn.yaml` | slskd web UI login (user `altf4`) |
-| `slskd_api_key`, `lidarr_api_key` | `saturn.yaml` | Generated keys Soularr uses for slskd and Lidarr |
 
 ```bash
 # Edit secrets (on a Mac; modules/home/mac-user.nix installs sops and age)

@@ -39,7 +39,9 @@ Rules:
   brick sets `homeProxy.routes.<name> = <port>;` and becomes
   `https://<name>.<domain>` on Tailscale. Media services use
   `config.media.dataDir` and group `media` from `services/media.nix`, and
-  set `RequiresMountsFor` on it. Their secrets are declared by the host.
+  set `RequiresMountsFor` on it. Bricks only install, run and route a
+  service; app settings are made in its web UI (README, Services: saturn),
+  so a brick works on any host.
 - **No auto-import magic.** No `builtins.readDir`, `listFilesRecursive` or
   directory loaders. Every import is a literal, greppable path.
 - **System vs. home split.** `modules/system/` holds NixOS/nix-darwin
@@ -81,17 +83,17 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/apps/grok-build.nix` | Any | Grok Build, xAI's coding agent CLI (`grok`) | mercury, saturn |
 | `system/services/caddy.nix` | NixOS | Caddy with the Cloudflare DNS plugin: wildcard cert for `*.<homeProxy.domain>`, routes from `homeProxy.routes`, ports 80/443 on `tailscale0` only; needs secret `cloudflare_api_token` | saturn |
 | `system/services/media.nix` | NixOS | `media` group (gid 2000) and `media.dataDir` (`/data`); the host mounts it | saturn |
-| `system/services/jellyfin.nix` | NixOS | Jellyfin at `jellyfin.<domain>`, library read-only; host sets hardware transcoding | saturn |
+| `system/services/jellyfin.nix` | NixOS | Jellyfin at `jellyfin.<domain>`, library read-only | saturn |
 | `system/services/qbittorrent.nix` | NixOS | qBittorrent at `qbittorrent.<domain>`, peer port 6881 open | saturn |
 | `system/services/prowlarr.nix` | NixOS | Prowlarr at `prowlarr.<domain>` | saturn |
 | `system/services/flaresolverr.nix` | NixOS | FlareSolverr on `localhost:8191` (no route) | saturn |
 | `system/services/sonarr.nix` | NixOS | Sonarr at `sonarr.<domain>` | saturn |
 | `system/services/radarr.nix` | NixOS | Radarr at `radarr.<domain>` | saturn |
-| `system/services/lidarr.nix` | NixOS | Lidarr at `lidarr.<domain>`; API key from secret `lidarr_api_key` | saturn |
+| `system/services/lidarr.nix` | NixOS | Lidarr at `lidarr.<domain>` | saturn |
 | `system/services/bazarr.nix` | NixOS | Bazarr at `bazarr.<domain>` | saturn |
 | `system/services/seerr.nix` | NixOS | Seerr at `seerr.<domain>` | saturn |
-| `system/services/slskd.nix` | NixOS | slskd at `slskd.<domain>`, port 50300 open; secrets `soulseek_username`, `soulseek_password`, `slskd_web_password`, `slskd_api_key` | saturn |
-| `system/services/soularr.nix` | NixOS | Soularr (Podman container, no UI): Lidarr wanted albums from slskd; config rendered from sops | saturn |
+| `system/services/slskd.nix` | NixOS | slskd (Podman container, configured in its web UI) at `slskd.<domain>`, port 50300 open | saturn |
+| `system/services/soularr.nix` | NixOS | Soularr (Podman container, no UI): Lidarr wanted albums from slskd; starts once `/var/lib/soularr/config.ini` exists | saturn |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |

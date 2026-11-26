@@ -1,46 +1,33 @@
-# Scope: NixOS system (slskd at slskd.<domain>: Soulseek client sharing the music library; port 50300 open for peers) | Used by: saturn
+# Scope: NixOS system (slskd container at slskd.<domain>: Soulseek client, configured in its web UI; port 50300 open for peers) | Used by: saturn
 { config, ... }:
 
 let
   data = config.media.dataDir;
+  state = "/var/lib/slskd";
 in
 {
-  services.slskd = {
-    enable = true;
-    group = "media";
-    openFirewall = true;
-    environmentFile = config.sops.templates."slskd.env".path;
-    settings = {
-      directories = {
-        downloads = "${data}/slskd/downloads";
-        incomplete = "${data}/slskd/incomplete";
-      };
-      shares.directories = [ "${data}/media/music" ];
+  virtualisation.podman.enable = true;
+
+  # Container, not the NixOS module: the module's config is read-only, so the web UI couldn't change it.
+  virtualisation.oci-containers.containers.slskd = {
+    image = "docker.io/slskd/slskd:latest";
+    user = "1000:${toString config.users.groups.media.gid}";
+    environment = {
+      TZ = config.time.timeZone;
+      SLSKD_REMOTE_CONFIGURATION = "true";
+      SLSKD_NO_HTTPS = "true";
     };
+    volumes = [
+      "${state}:/app"
+      "${data}:${data}"
+    ];
+    extraOptions = [ "--network=host" ];
   };
 
-  # The host declares these sops secrets.
-  sops.templates."slskd.env" = {
-    content = ''
-      SLSKD_SLSK_USERNAME=${config.sops.placeholder.soulseek_username}
-      SLSKD_SLSK_PASSWORD=${config.sops.placeholder.soulseek_password}
-      SLSKD_USERNAME=altf4
-      SLSKD_PASSWORD=${config.sops.placeholder.slskd_web_password}
-      SLSKD_API_KEY=${config.sops.placeholder.slskd_api_key}
-    '';
-  };
-  # Restart on switch when the template or its encrypted secrets change.
-  systemd.services.slskd.restartTriggers = [
-    config.sops.templates."slskd.env".content
-  ]
-  ++ map (s: builtins.hashFile "sha256" config.sops.secrets.${s}.sopsFile) [
-    "soulseek_username"
-    "soulseek_password"
-    "slskd_web_password"
-    "slskd_api_key"
-  ];
+  systemd.tmpfiles.rules = [ "Z ${state} - 1000 media -" ];
+  systemd.services.podman-slskd.unitConfig.RequiresMountsFor = [ data ];
 
-  systemd.services.slskd.unitConfig.RequiresMountsFor = [ data ];
+  networking.firewall.allowedTCPPorts = [ 50300 ];
 
-  homeProxy.routes.slskd = config.services.slskd.settings.web.port;
+  homeProxy.routes.slskd = 5030;
 }
