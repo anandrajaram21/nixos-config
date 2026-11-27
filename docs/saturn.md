@@ -161,7 +161,7 @@ After the first boot, over SSH:
    [secrets.md](secrets.md)), then rebuild.
 2. **Tailscale:** run `sudo tailscale up` and open the login link it prints.
 3. **GitHub CLI and agents:** run `gh auth login`, and sign in to Claude Code,
-   OpenCode and Grok Build (`grok`).
+   OpenCode, Grok Build (`grok`) and the Antigravity CLI (`agy`).
 4. **Services:** if saturn's Tailscale IP changed, update the `*.home`
    record in Cloudflare, then restore `/var/lib/<app>` from a backup or
    follow [saturn-media-setup.md](saturn-media-setup.md).
