@@ -20,6 +20,7 @@ in
       management = {
         allow-remote = lib.mkDefault true;
         secret-key._secret = config.sops.secrets.cliproxyapi_management_key.path;
+        panel-github-repository = lib.mkDefault "https://github.com/anandrajaram21/Cli-Proxy-API-Management-Center";
       };
       access.api-keys = [
         { _secret = config.sops.secrets.cliproxyapi_api_key.path; }
