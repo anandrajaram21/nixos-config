@@ -6,8 +6,8 @@ Three apps, each at `https://<name>.home.anandrajaram.dev` on the tailnet:
 
 | App | Shows | Setup |
 |---|---|---|
-| Homepage (`homepage`) | Start page: a tile per service with a green/red up check, plus CPU, memory, root disk, CPU temperature and uptime | None. It's built from `homeProxy.routes`, so a new service brick gets a tile on its own |
-| Beszel (`beszel`) | CPU, memory, disk usage and I/O, network, temperatures, GPU (`nvidia-smi`), Podman containers and systemd units, with history and alerts | Once, below |
+| Homepage (`homepage`) | Start page: a tile per service with a green/red up check, plus CPU, memory, CPU temperature, uptime and disk space for the NVMe and ScoobyDoo. Scrutiny's tile shows drive health counts | None. It's built from `homeProxy.routes`, so a new service brick gets a tile on its own. Widgets that need an app's API key are left out on purpose, so no keys are stored |
+| Beszel (`beszel`) | CPU, memory, disk usage and I/O (NVMe and ScoobyDoo, read through `/mnt/data`), network, temperatures, GPU (`nvidia-smi`), Podman containers and systemd units, with history and alerts | Once, below |
 | Scrutiny (`scrutiny`) | SMART health for the NVMe and the `ScoobyDoo` HDD, with failure warnings | None. The collector runs daily; the first data shows up after its first run |
 
 Scrutiny and smartd only read SMART data; they never write to a disk.

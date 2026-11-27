@@ -100,7 +100,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/services/beszel.nix` | NixOS | Beszel hub at `beszel.<domain>`: CPU, memory, disk, network, GPU and container history and alerts | saturn |
 | `system/services/beszel-agent.nix` | NixOS | Beszel agent (NVIDIA GPU, Podman containers, systemd units); starts once the host sets `services.beszel.agent.environment.KEY`; port 45876 on `tailscale0` | saturn |
 | `system/services/scrutiny.nix` | NixOS | Scrutiny at `scrutiny.<domain>`: SMART disk health (InfluxDB on localhost) | saturn |
-| `system/services/homepage.nix` | NixOS | Homepage at `homepage.<domain>`: a tile and up/down check per `homeProxy.routes` entry, plus CPU, memory and disk | saturn |
+| `system/services/homepage.nix` | NixOS | Homepage at `homepage.<domain>`: a tile and up/down check per `homeProxy.routes` entry, live stats only where no API key is needed (Scrutiny), plus CPU, memory and disk | saturn |
 | `system/darwin-base.nix` | macOS (required) | primary user, nix gc, sops key path, Homebrew | mercury |
 | `system/mac-defaults.nix` | macOS | `system.defaults`: Dock, trackpad, keyboard, menu bar, lock; applied without logout | mercury |
 | `system/apps/obsidian.nix` | Any | Obsidian | mercury |

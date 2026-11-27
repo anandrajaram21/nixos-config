@@ -1,14 +1,22 @@
-# Scope: NixOS system (Homepage at homepage.<domain>: start page with a tile and up/down check per homeProxy route, plus CPU, memory and disk) | Used by: saturn
+# Scope: NixOS system (Homepage at homepage.<domain>: start page with a tile, up/down check and live stats where no API key is needed, per homeProxy route, plus CPU, memory and disk) | Used by: saturn
 { config, lib, ... }:
 
 let
   domain = config.homeProxy.domain;
   port = 8082;
+  liveStats = {
+    scrutiny.type = "scrutiny";
+  };
   tile = name: routePort: {
     "${lib.toUpper (lib.substring 0 1 name)}${lib.substring 1 (-1) name}" = {
       href = "https://${name}.${domain}";
       icon = "${name}.png";
       siteMonitor = "http://127.0.0.1:${toString routePort}";
+    }
+    // lib.optionalAttrs (liveStats ? ${name}) {
+      widget = liveStats.${name} // {
+        url = "http://127.0.0.1:${toString routePort}";
+      };
     };
   };
 in
