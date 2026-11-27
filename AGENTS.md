@@ -128,7 +128,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `home/dev.nix` | Any | CLI tools, Node (fnm), Python (uv), Bun, pnpm, PHP | mercury, saturn |
 | `home/claude-code.nix` | Any | Claude Code + `settings.json` | mercury, saturn |
 | `home/opencode.nix` | Any | OpenCode + settings, `oc` alias | mercury, saturn |
-| `home/mac-user.nix` | macOS | Mac PATHs, sops/age CLIs, `~/Life` folders | mercury |
+| `home/mac-user.nix` | macOS | macOS `PNPM_HOME` and mysql-client PATH, sops/age CLIs, `~/Life` folders | mercury |
 | `home/mac-wallpaper.nix` | macOS | desktop wallpaper from `assets/wallpapers/` | mercury |
 | `home/apps/t3code.nix` | Any | T3 Code settings merged into `~/.t3/userdata` on every switch | mercury, saturn |
 | `home/apps/ghostty.nix` | Any | Ghostty config (`package = mkDefault null`) | mercury, saturn |
