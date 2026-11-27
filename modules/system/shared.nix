@@ -24,6 +24,7 @@
 
     sops.defaultSopsFile = ../../secrets/common.yaml;
     sops.secrets.github_ssh_key.owner = "altf4";
+    sops.secrets.cliproxyapi_api_key.owner = "altf4";
 
     time.timeZone = "Asia/Calcutta";
 

@@ -24,7 +24,9 @@ goes in `hosts/<host>/default.nix` with `sopsFile = ../../secrets/<host>.yaml;`.
 | Secret | File | Used for |
 |---|---|---|
 | `github_ssh_key` | `common.yaml` | GitHub SSH auth and commit signing for altf4 |
+| `cliproxyapi_api_key` | `common.yaml` | Bearer access key for CLIProxyAPI (shared between hub and clients) |
 | `cloudflare_api_token` | `saturn.yaml` | Caddy's DNS challenge for `*.home.anandrajaram.dev` |
+| `cliproxyapi_management_key` | `saturn.yaml` | CLIProxyAPI Management API and `/management.html` admin panel |
 
 ```bash
 # Edit secrets (on a Mac; modules/home/mac-user.nix installs sops and age)

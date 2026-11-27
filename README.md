@@ -28,7 +28,8 @@ Declarative configuration for my machines, built with
   Bazarr, Seerr, qBittorrent, slskd and Soularr, each at
   `https://<name>.home.anandrajaram.dev` over Tailscale through Caddy.
   Monitoring: Homepage as the start page, Beszel for CPU, memory, disk,
-  network and GPU history, and Scrutiny for disk health.
+  network and GPU history, and Scrutiny for disk health. AI hub: CLIProxyAPI
+  for pooling OAuth CLI subscriptions behind one API endpoint.
 - **Secrets:** encrypted with sops in `secrets/`, decrypted at activation.
 
 ## Ideology
@@ -68,7 +69,7 @@ Declarative configuration for my machines, built with
 ├── .sops.yaml                         # which age keys can decrypt secrets/
 ├── secrets/
 │   ├── common.yaml                    # sops-encrypted secrets for every host
-│   └── saturn.yaml                    # saturn only: Cloudflare token
+│   └── saturn.yaml                    # saturn only: Cloudflare token, CLIProxyAPI management key
 ├── modules/                           # database of bricks; bricks never import each other
 │   ├── system/
 │   │   ├── shared.nix                 # every host (required): unfree list, sops, nix, timezone, fish
@@ -85,6 +86,7 @@ Declarative configuration for my machines, built with
 │   │   │   └── qbittorrent.nix, prowlarr.nix, flaresolverr.nix, sonarr.nix, radarr.nix,
 │   │   │       lidarr.nix, bazarr.nix, seerr.nix, slskd.nix, soularr.nix   # download and request stack
 │   │   │   └── beszel.nix, beszel-agent.nix, scrutiny.nix, homepage.nix   # monitoring and start page
+│   │   │   └── cliproxyapi.nix        # OpenAI/Claude/Gemini/Codex/Grok API proxy for OAuth subscriptions
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)

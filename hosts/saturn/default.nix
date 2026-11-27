@@ -35,6 +35,7 @@
     ../../modules/system/services/beszel-agent.nix
     ../../modules/system/services/scrutiny.nix
     ../../modules/system/services/homepage.nix
+    ../../modules/system/services/cliproxyapi.nix
   ];
 
   # nouveau deadlocks when waking the GPU from runtime suspend.
@@ -105,6 +106,7 @@
   ];
 
   sops.secrets.cloudflare_api_token.sopsFile = ../../secrets/saturn.yaml;
+  sops.secrets.cliproxyapi_management_key.sopsFile = ../../secrets/saturn.yaml;
 
   # Jellyfin on the LAN too, for the TV (plain HTTP).
   networking.firewall.interfaces.enp7s0f1.allowedTCPPorts = [ 8096 ];

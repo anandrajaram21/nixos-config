@@ -76,6 +76,7 @@ device on tailnet ─▶ <name>.home.<domain> ─(DNS)─▶ saturn's Tailscale 
 | `homepage` | Start page: a tile per service with an up/down check, plus CPU, memory and disk |
 | `beszel` | CPU, memory, disk, network, GPU and container graphs with history and alerts |
 | `scrutiny` | Disk health from SMART, with failure warnings |
+| `cliproxy` | CLIProxyAPI hub: pools OAuth CLI subscriptions behind one API endpoint (`/management.html` for admin) |
 
 - **DNS:** a Cloudflare `A` record `*.home` → saturn's Tailscale IP
   (`tailscale ip -4`, currently `100.95.91.64`), DNS only (grey cloud). The
