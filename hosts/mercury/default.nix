@@ -7,6 +7,7 @@
     ../../modules/system/mac-defaults.nix
     ../../modules/system/apps/1password.nix
     ../../modules/system/apps/antigravity.nix
+    ../../modules/system/apps/antigravity-cli.nix
     ../../modules/system/apps/betterdisplay.nix
     ../../modules/system/apps/cmux.nix
     ../../modules/system/apps/ghostty.nix

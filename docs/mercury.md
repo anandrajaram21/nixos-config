@@ -44,7 +44,7 @@ except these manual steps after the first switch:
 2. **Tailscale:** open the app and log in.
 3. **GitHub CLI:** run `gh auth login`. Git itself already works over SSH with
    the sops key; `gh` needs its own token for the API.
-4. **Claude Code, OpenCode, Grok Build, Antigravity, T3 Code:** sign in to each. In T3 Code, also sign
+4. **Claude Code, OpenCode, Grok Build, Antigravity (IDE and `agy`), T3 Code:** sign in to each. In T3 Code, also sign
    in to T3 Connect. If other devices should reach its server, switch its
    server exposure to network-accessible in the app; that's stored in
    `~/.t3/userdata/desktop-settings.json` (`serverExposureMode`), which this
