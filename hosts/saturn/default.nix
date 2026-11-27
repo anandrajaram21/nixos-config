@@ -15,7 +15,6 @@
     ../../modules/system/nixos-base.nix
     ../../modules/system/server.nix
     ../../modules/system/nvidia.nix
-    ../../modules/system/apps/antigravity.nix
     ../../modules/system/apps/antigravity-cli.nix
     ../../modules/system/apps/grok-build.nix
     ../../modules/system/apps/t3code-server.nix
