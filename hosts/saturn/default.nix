@@ -91,6 +91,8 @@
 
   homeProxy.domain = "home.anandrajaram.dev";
 
+  services.beszel.agent.environment.KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXCehA8EajgXjw0XMoOobTTimvMrG7DfP7PEyi/GHiQ";
+
   sops.secrets.cloudflare_api_token.sopsFile = ../../secrets/saturn.yaml;
 
   # Jellyfin on the LAN too, for the TV (plain HTTP).
