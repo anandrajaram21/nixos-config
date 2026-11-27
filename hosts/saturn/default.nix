@@ -2,7 +2,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -67,9 +66,10 @@
     options = [
       "rw"
       "nofail"
-      "uid=1000"
+      "uid=${toString config.users.users.altf4.uid}"
       "gid=${toString config.users.groups.media.gid}"
-      "umask=002"
+      "dmask=002"
+      "fmask=113"
     ];
   };
   fileSystems."/mnt/data" = {
@@ -115,8 +115,6 @@
   users.users.altf4.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINrmz9lXsHdKIIsF7C8pPhASp26icrNWPudfVBOk2GTC saturn"
   ];
-
-  environment.systemPackages = [ pkgs.ntfs3g ];
 
   # Install release; never change.
   system.stateVersion = "26.05";

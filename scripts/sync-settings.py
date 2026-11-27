@@ -131,9 +131,10 @@ def same(a, b):
     # Some apps store JSON inside a string and re-serialise it with another key order.
     if isinstance(a, str) and isinstance(b, str):
         try:
-            return json.loads(a) == json.loads(b)
+            ja, jb = json.loads(a), json.loads(b)
         except ValueError:
             return False
+        return isinstance(ja, (dict, list)) and ja == jb
     return False
 
 
@@ -159,7 +160,7 @@ def sync_attrset(lines, name, current, ignore):
         ).stdout
     )
 
-    entries, entry = [], None
+    entries, entry, preamble = [], None, []
     for line in block:
         m = ENTRY.match(line)
         if m:
@@ -167,9 +168,9 @@ def sync_attrset(lines, name, current, ignore):
             entry = [json.loads(key) if key.startswith('"') else key, [line]]
             entries.append(entry)
         else:
-            entry[1].append(line)
+            (entry[1] if entry else preamble).append(line)
 
-    unmanaged, changed, body = [], [], []
+    unmanaged, changed, body = [], [], preamble
     for key in current:
         if key not in pinned and key not in ignore:
             unmanaged.append(key)
@@ -205,16 +206,19 @@ def main():
         module = os.path.join(REPO, "modules", "home", "apps", app["module"])
         with open(module) as f:
             lines = f.read().split("\n")
-        changed, unmanaged = [], []
+        changed, unmanaged, missing = [], [], None
         for attr, read in app["sources"]:
             try:
                 current = read()
             except FileNotFoundError as e:
-                print(f"{n}: skipped, {e.filename} not found")
+                missing = e.filename
                 break
             lines, c, u = sync_attrset(lines, attr, current, app.get("ignore", set()))
             changed += c
             unmanaged += u
+        if missing:
+            print(f"{n}: skipped, {missing} not found")
+            continue
         with open(module, "w") as f:
             f.write("\n".join(lines))
         print(f"{n}: updated {len(changed)} setting(s){': ' + ', '.join(changed) if changed else ''}")

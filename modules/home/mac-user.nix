@@ -11,16 +11,7 @@
     run mkdir -p "$HOME/Life/Work" "$HOME/Life/Personal"
   '';
 
-  home.sessionVariables = {
-    BUN_INSTALL = "$HOME/.bun";
-    PNPM_HOME = "$HOME/Library/pnpm";
-  };
-  home.sessionPath = [
-    "$HOME/.bun/bin"
-    "$HOME/Library/pnpm"
-    "$HOME/.config/composer/vendor/bin"
-    "$HOME/.local/bin"
-  ];
+  home.sessionVariables.PNPM_HOME = "$HOME/Library/pnpm";
 
   programs.fish = {
     interactiveShellInit = ''

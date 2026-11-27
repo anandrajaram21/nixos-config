@@ -193,8 +193,9 @@ Pascal needs both: the open modules need Turing or newer, and 580 is the last
 driver series that supports Pascal. CUDA 13 also dropped Pascal, so CUDA
 workloads such as Ollama need a CUDA 12 build.
 
-For media transcoding, the Intel iGPU (Quick Sync, `intel-media-driver`)
-handles H.264/HEVC and uses far less power than the dGPU.
+Jellyfin transcodes with NVENC on the GTX 1060 (set in its dashboard, see
+`docs/saturn-media-setup.md`). The Intel iGPU's Quick Sync isn't set up: it
+would need `intel-media-driver` in `hardware.graphics.extraPackages`.
 
 ## Known issues
 

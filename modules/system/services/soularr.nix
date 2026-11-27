@@ -10,7 +10,7 @@ in
 
   virtualisation.oci-containers.containers.soularr = {
     image = "docker.io/mrusse08/soularr:latest";
-    user = "1000:${toString config.users.groups.media.gid}";
+    user = "${toString config.users.users.altf4.uid}:${toString config.users.groups.media.gid}";
     environment = {
       TZ = config.time.timeZone;
       SCRIPT_INTERVAL = "300";
@@ -23,7 +23,7 @@ in
     extraOptions = [ "--network=host" ];
   };
 
-  systemd.tmpfiles.rules = [ "d ${state} 0750 1000 media -" ];
+  systemd.tmpfiles.rules = [ "d ${state} 0750 ${toString config.users.users.altf4.uid} media -" ];
   systemd.services.podman-soularr.unitConfig = {
     RequiresMountsFor = [ data ];
     ConditionPathExists = "${state}/config.ini";

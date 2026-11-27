@@ -18,6 +18,17 @@
     phpPackages.composer
   ];
 
+  home.sessionVariables = {
+    BUN_INSTALL = "$HOME/.bun";
+    PNPM_HOME = lib.mkDefault "$HOME/.local/share/pnpm";
+  };
+  home.sessionPath = [
+    "$HOME/.bun/bin"
+    "$PNPM_HOME"
+    "$HOME/.config/composer/vendor/bin"
+    "$HOME/.local/bin"
+  ];
+
   programs.fish.interactiveShellInit = ''
     fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
   '';
