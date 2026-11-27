@@ -82,6 +82,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/nvidia.nix` | NixOS | NVIDIA driver + PRIME offload; host sets bus IDs | saturn |
 | `system/apps/t3code-server.nix` | NixOS | T3 Code server only, `t3` with T3 Connect, for headless hosts: official prebuilt x86_64 release run via nix-ld, plus a `t3code` boot service as altf4 and nixpkgs `cloudflared` as its T3 Connect relay client (bump `version` + hash to update) | saturn |
 | `system/apps/t3code-appimage.nix` | NixOS | T3 Code desktop app with T3 Connect, for GUI hosts (official prebuilt x86_64 AppImage; bump `version` + hash to update) | none yet (planned: venus) |
+| `system/apps/antigravity.nix` | Any | Google Antigravity IDE (`antigravity`) | mercury, saturn |
 | `system/apps/grok-build.nix` | Any | Grok Build, xAI's coding agent CLI (`grok`) | mercury, saturn |
 | `system/services/caddy.nix` | NixOS | Caddy with the Cloudflare DNS plugin: wildcard cert for `*.<homeProxy.domain>`, routes from `homeProxy.routes`, ports 80/443 on `tailscale0` only; needs secret `cloudflare_api_token` | saturn |
 | `system/services/media.nix` | NixOS | `media` group (gid 2000) and `media.dataDir` (`/data`); the host mounts it | saturn |

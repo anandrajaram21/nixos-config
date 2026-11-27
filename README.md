@@ -19,7 +19,7 @@ Declarative configuration for my machines, built with
 - **Shell and dev tools, on every host:** fish with starship, zoxide, direnv
   and eza; neovim; git and gh with SSH commit signing; Node (fnm), Python (uv),
   Bun, pnpm, PHP; Claude Code, OpenCode, Grok Build and T3 Code with their
-  settings.
+  settings; the Antigravity IDE.
 - **mercury:** macOS defaults (Dock, trackpad, keyboard, menu bar), wallpaper,
   and every GUI app (Ghostty, 1Password, Raycast, OrbStack, VS Code, Obsidian,
   Slack, Spotify, Zoom, …) from nixpkgs, Homebrew casks or the App Store.
@@ -87,6 +87,7 @@ Declarative configuration for my machines, built with
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
 │   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
 │   │       ├── grok-build.nix         # every host: Grok Build CLI (`grok`)
+│   │       ├── antigravity.nix        # every host: Google Antigravity IDE
 │   │       ├── obsidian.nix, slack.nix, spotify.nix, zoom.nix   # cross-OS, used on the Mac
 │   │       └── 1password.nix, betterdisplay.nix, cmux.nix, ghostty.nix, grok-bot.nix,
 │   │           helium-browser.nix, hex.nix, local.nix, orbstack.nix, raycast.nix,
