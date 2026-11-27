@@ -122,6 +122,7 @@ Declarative configuration for my machines, built with
 │   ├── mercury.md                     # Mac: fresh setup, manual steps, app settings, permissions
 │   ├── saturn.md                      # server: hardware, services, storage, install, known issues
 │   ├── saturn-media-setup.md          # one-time web UI setup for saturn's media stack
+│   ├── saturn-monitoring.md           # Homepage, Beszel and Scrutiny: what each shows, first-run setup
 │   ├── secrets.md                     # sops: keys, files, editing
 │   └── adding-a-host.md               # new machine checklist
 ├── scripts/mac-setup.sh               # fresh-Mac bootstrap: Homebrew, Nix, age key, first switch
