@@ -31,6 +31,10 @@
     ../../modules/system/services/seerr.nix
     ../../modules/system/services/slskd.nix
     ../../modules/system/services/soularr.nix
+    ../../modules/system/services/beszel.nix
+    ../../modules/system/services/beszel-agent.nix
+    ../../modules/system/services/scrutiny.nix
+    ../../modules/system/services/homepage.nix
   ];
 
   # nouveau deadlocks when waking the GPU from runtime suspend.

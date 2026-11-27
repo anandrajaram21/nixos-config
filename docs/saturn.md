@@ -73,6 +73,9 @@ device on tailnet ─▶ <name>.home.<domain> ─(DNS)─▶ saturn's Tailscale 
 | `bazarr` | Subtitles for Sonarr and Radarr |
 | `qbittorrent` | Downloads |
 | `slskd` | Soulseek client; Soularr (no UI) fills Lidarr's wanted albums from it every 5 minutes |
+| `homepage` | Start page: a tile per service with an up/down check, plus CPU, memory and disk |
+| `beszel` | CPU, memory, disk, network, GPU and container graphs with history and alerts |
+| `scrutiny` | Disk health from SMART, with failure warnings |
 
 - **DNS:** a Cloudflare `A` record `*.home` → saturn's Tailscale IP
   (`tailscale ip -4`, currently `100.95.91.64`), DNS only (grey cloud). The
@@ -95,7 +98,8 @@ Nix only installs and runs the services. Each app's settings (folders,
 download clients, connections between apps, logins) are set once in its web
 UI and kept under `/var/lib/<app>` on saturn; they only need redoing after a
 reinstall. [saturn-media-setup.md](saturn-media-setup.md) walks through every
-app in order.
+app in order; [saturn-monitoring.md](saturn-monitoring.md) covers the
+monitoring apps.
 
 Check from a tailnet device: `dig +short jellyfin.home.anandrajaram.dev`
 returns the Tailscale IP, and `curl -I https://jellyfin.home.anandrajaram.dev`
