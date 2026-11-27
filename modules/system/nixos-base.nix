@@ -24,6 +24,7 @@
 
   users.users.altf4 = {
     isNormalUser = true;
+    uid = 1000;
     extraGroups = [
       "wheel"
       "networkmanager"
