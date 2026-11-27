@@ -75,7 +75,7 @@ bricks' `Used by` headers and the README layout in sync.
 
 | Brick | Platform | Provides | Used by |
 |---|---|---|---|
-| `system/shared.nix` | Any (required) | `allowedUnfreePackages` option, flakes, sops defaults, timezone, fish as login shell | mercury, saturn |
+| `system/shared.nix` | Any (required) | `allowedUnfreePackages` and `cliproxy.url` options, flakes, sops defaults, timezone, fish as login shell | mercury, saturn |
 | `system/fonts.nix` | Any | GeistMono Nerd Font | mercury, saturn |
 | `system/nixos-base.nix` | NixOS (required) | boot, nix gc, user, NetworkManager, Tailscale, nix-ld, base packages | saturn |
 | `system/server.nix` | NixOS | headless server: OpenSSH (keys only) | saturn |
@@ -127,12 +127,13 @@ bricks' `Used by` headers and the README layout in sync.
 | `home/shell.nix` | Any | fish, starship, zoxide (`cd`), direnv, eza, neovim as `$EDITOR` | mercury, saturn |
 | `home/git.nix` | Any | git + gh, SSH commit signing and GitHub SSH with the sops key | mercury, saturn |
 | `home/dev.nix` | Any | CLI tools, Node (fnm), Python (uv), Bun, pnpm, PHP | mercury, saturn |
-| `home/claude-code.nix` | Any | Claude Code + `settings.json` | mercury, saturn |
+| `home/claude-code.nix` | Any | Claude Code + `settings.json` (routes through `cliproxy.url` when set) | mercury, saturn |
 | `home/opencode.nix` | Any | OpenCode + settings, `oc` alias | mercury, saturn |
 | `home/mac-user.nix` | macOS | Mac PATHs, sops/age CLIs, `~/Life` folders | mercury |
 | `home/mac-wallpaper.nix` | macOS | desktop wallpaper from `assets/wallpapers/` | mercury |
 | `home/apps/t3code.nix` | Any | T3 Code settings merged into `~/.t3/userdata` on every switch | mercury, saturn |
 | `home/apps/ghostty.nix` | Any | Ghostty config (`package = mkDefault null`) | mercury, saturn |
+| `home/apps/grok-build.nix` | Any | Grok Build config merged into `~/.grok/config.toml` on every switch (routes through `cliproxy.url` when set) | mercury, saturn |
 | `home/apps/1password.nix` | macOS | SSH through the 1Password agent (GitHub excluded) | mercury |
 | `home/apps/orbstack.nix` | macOS | OrbStack fish init and SSH include | mercury |
 | `home/apps/cmux.nix` | macOS | cmux config | mercury |

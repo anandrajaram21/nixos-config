@@ -32,6 +32,8 @@
   networking.hostName = "mercury";
   networking.computerName = "mercury";
 
+  cliproxy.url = "https://cliproxy.home.anandrajaram.dev";
+
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   # Install release; never change.
@@ -49,6 +51,7 @@
       ../../modules/home/apps/1password.nix
       ../../modules/home/apps/cmux.nix
       ../../modules/home/apps/ghostty.nix
+      ../../modules/home/apps/grok-build.nix
       ../../modules/home/apps/hex.nix
       ../../modules/home/apps/orbstack.nix
       ../../modules/home/apps/t3code.nix

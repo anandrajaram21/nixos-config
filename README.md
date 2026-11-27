@@ -109,6 +109,7 @@ Declarative configuration for my machines, built with
 │       └── apps/                      # app config only; the app comes from system/apps/<same name>*.nix
 │           ├── t3code.nix             # every host: T3 Code settings
 │           ├── ghostty.nix            # every host: Ghostty config
+│           ├── grok-build.nix         # every host: Grok Build config (CLIProxyAPI routing)
 │           ├── 1password.nix          # Mac: SSH through the 1Password agent
 │           ├── orbstack.nix           # Mac: OrbStack shell init and SSH config
 │           ├── cmux.nix               # Mac: cmux config

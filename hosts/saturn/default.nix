@@ -91,6 +91,7 @@
   };
 
   homeProxy.domain = "home.anandrajaram.dev";
+  cliproxy.url = "https://cliproxy.${config.homeProxy.domain}";
 
   services.beszel.agent.environment = {
     KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXCehA8EajgXjw0XMoOobTTimvMrG7DfP7PEyi/GHiQ";
@@ -128,6 +129,7 @@
       ../../modules/home/claude-code.nix
       ../../modules/home/opencode.nix
       ../../modules/home/apps/ghostty.nix
+      ../../modules/home/apps/grok-build.nix
       ../../modules/home/apps/t3code.nix
     ];
 

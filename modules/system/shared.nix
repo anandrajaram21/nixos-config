@@ -7,9 +7,18 @@
 }:
 
 {
-  options.allowedUnfreePackages = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [ ];
+  options = {
+    allowedUnfreePackages = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+    };
+
+    cliproxy.url = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "https://cliproxy.home.example.com";
+      description = "CLIProxyAPI base URL for AI CLI clients on this host.";
+    };
   };
 
   config = {
