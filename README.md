@@ -27,6 +27,8 @@ Declarative configuration for my machines, built with
   Code server, and a media stack: Jellyfin, Sonarr, Radarr, Lidarr, Prowlarr,
   Bazarr, Seerr, qBittorrent, slskd and Soularr, each at
   `https://<name>.home.anandrajaram.dev` over Tailscale through Caddy.
+  Monitoring: Homepage as the start page, Beszel for CPU, memory, disk,
+  network and GPU history, and Scrutiny for disk health.
 - **Secrets:** encrypted with sops in `secrets/`, decrypted at activation.
 
 ## Ideology
@@ -82,6 +84,7 @@ Declarative configuration for my machines, built with
 │   │   │   ├── jellyfin.nix           # media server
 │   │   │   └── qbittorrent.nix, prowlarr.nix, flaresolverr.nix, sonarr.nix, radarr.nix,
 │   │   │       lidarr.nix, bazarr.nix, seerr.nix, slskd.nix, soularr.nix   # download and request stack
+│   │   │   └── beszel.nix, beszel-agent.nix, scrutiny.nix, homepage.nix   # monitoring and start page
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code app (official cask, updates itself)
 │   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
@@ -145,6 +148,7 @@ specific to that machine.
 | [docs/mercury.md](docs/mercury.md) | Fresh Mac setup and manual steps, everyday use, syncing app settings, where apps get installed from, privacy permissions after updates |
 | [docs/saturn.md](docs/saturn.md) | Hardware, everyday use and rollbacks, services and HTTPS, the data disk, fresh install, NVIDIA, known issues |
 | [docs/saturn-media-setup.md](docs/saturn-media-setup.md) | One-time web UI setup for every media app, in order |
+| [docs/saturn-monitoring.md](docs/saturn-monitoring.md) | Homepage, Beszel and Scrutiny: what each shows, first-run setup |
 | [docs/secrets.md](docs/secrets.md) | sops keys and files, editing secrets, adding a host's key |
 | [docs/adding-a-host.md](docs/adding-a-host.md) | Bringing a new machine into the flake |
 | [AGENTS.md](AGENTS.md) | Rules, brick catalog and checklists for AI coding agents |
