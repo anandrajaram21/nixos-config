@@ -14,16 +14,24 @@ let
     exec ${lib.getExe' pkgs.coreutils "tr"} -d '\r\n' < ${lib.escapeShellArg keyFile}
   '';
 
-  patchFile = (pkgs.formats.toml { }).generate "grok-cliproxy.toml" {
-    auth = {
-      auth_provider_command = toString authHelper;
-      auth_provider_label = "CLIProxyAPI";
-    };
-    endpoints = {
-      models_base_url = "${cliproxyUrl}/v1";
-      models_list_url = "${cliproxyUrl}/v1/models";
-    };
-  };
+  patchFile = (pkgs.formats.toml { }).generate "grok-config.toml" (
+    {
+      models = {
+        default = "grok-4.6";
+        default_reasoning_effort = "medium";
+      };
+    }
+    // lib.optionalAttrs (cliproxyUrl != null) {
+      auth = {
+        auth_provider_command = toString authHelper;
+        auth_provider_label = "CLIProxyAPI";
+      };
+      endpoints = {
+        models_base_url = "${cliproxyUrl}/v1";
+        models_list_url = "${cliproxyUrl}/v1/models";
+      };
+    }
+  );
 
   python = pkgs.python3.withPackages (p: [ p.tomlkit ]);
   mergeToml = pkgs.writeScript "merge-grok-config.py" ''
@@ -48,11 +56,9 @@ let
   '';
 in
 {
-  home.activation.grokBuildSettings = lib.mkIf (cliproxyUrl != null) (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [[ ! -v DRY_RUN ]]; then
-        ${mergeToml} "$HOME/.grok/config.toml" ${patchFile}
-      fi
-    ''
-  );
+  home.activation.grokBuildSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [[ ! -v DRY_RUN ]]; then
+      ${mergeToml} "$HOME/.grok/config.toml" ${patchFile}
+    fi
+  '';
 }

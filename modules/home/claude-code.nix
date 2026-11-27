@@ -19,6 +19,8 @@ in
     enable = true;
     mutableSettings = true;
     settings = {
+      model = "claude-opus-5-5";
+      effortLevel = "medium";
       permissions.defaultMode = "bypassPermissions";
       skipDangerousModePermissionPrompt = true;
       autoMemoryEnabled = false;
