@@ -11,7 +11,7 @@ in
   # Container, not the NixOS module: the module's config is read-only, so the web UI couldn't change it.
   virtualisation.oci-containers.containers.slskd = {
     image = "docker.io/slskd/slskd:latest";
-    user = "1000:${toString config.users.groups.media.gid}";
+    user = "${toString config.users.users.altf4.uid}:${toString config.users.groups.media.gid}";
     environment = {
       TZ = config.time.timeZone;
       SLSKD_REMOTE_CONFIGURATION = "true";
@@ -24,7 +24,10 @@ in
     extraOptions = [ "--network=host" ];
   };
 
-  systemd.tmpfiles.rules = [ "Z ${state} - 1000 media -" ];
+  systemd.tmpfiles.rules = [
+    "d ${state} 0750 ${toString config.users.users.altf4.uid} media -"
+    "Z ${state} - ${toString config.users.users.altf4.uid} media -"
+  ];
   systemd.services.podman-slskd.unitConfig.RequiresMountsFor = [ data ];
 
   networking.firewall.allowedTCPPorts = [ 50300 ];
