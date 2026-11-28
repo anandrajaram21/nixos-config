@@ -1,14 +1,14 @@
-# Scope: NixOS system (T3 Code server `t3`, official prebuilt release with T3 Connect, as a boot service) | Used by: saturn
+# Scope: NixOS system (T3 Code server `t3`, official prebuilt nightly release with T3 Connect, as a boot service) | Used by: saturn
 { pkgs, lib, ... }:
 
 let
-  version = "0.1.12";
+  version = "0.1.14-nightly.20261128.5372";
   t3 = pkgs.stdenvNoCC.mkDerivation {
     pname = "t3code-server";
     inherit version;
     src = pkgs.fetchurl {
       url = "https://github.com/pingdotgg/t3code/releases/download/v${version}/t3-${version}-linux-x64.tar.gz";
-      hash = "sha256-m6PbRuNVT7mXD9Xt6egjwvbW9nY/QDQL1MjvawlQHFQ=";
+      hash = "sha256-7UcTbVaWppMwONCmcW5gJpxQMLsrZPrid8E9jp0bMCI=";
     };
     # Node SEA binary: stripping or patchelf corrupts the embedded app, so it runs as-is via nix-ld.
     dontFixup = true;

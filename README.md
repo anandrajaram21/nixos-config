@@ -89,7 +89,7 @@ Declarative configuration for my machines, built with
 │   │   │   └── cliproxyapi.nix        # OpenAI/Claude/Gemini/Codex/Grok API proxy for OAuth subscriptions
 │   │   └── apps/                      # one brick per app; each installs it (nixpkgs, cask or App Store)
 │   │       ├── t3code-cask.nix        # Mac: T3 Code Nightly app (official cask, updates itself)
-│   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt release)
+│   │       ├── t3code-server.nix      # headless NixOS: T3 Code server `t3` as a boot service (official prebuilt nightly)
 │   │       ├── t3code-appimage.nix    # NixOS desktop (venus): T3 Code app (official AppImage)
 │   │       ├── grok-build.nix         # every host: Grok Build CLI (`grok`)
 │   │       ├── antigravity-cli.nix    # every host: Antigravity CLI (`agy`)

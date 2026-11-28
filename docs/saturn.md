@@ -34,6 +34,7 @@ lists every recipe:
 just switch-saturn     # apply config changes
 just boot-saturn       # build now, activate on next boot
 just update            # update all inputs (then switch)
+just bump-t3           # pin T3 Code server to the latest nightly (then switch)
 just rollback-saturn   # back to the previous generation
 just gc                # delete generations older than 30 days (also runs weekly)
 ```

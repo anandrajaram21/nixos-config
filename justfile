@@ -60,3 +60,15 @@ fmt:
 # Update all flake inputs
 update:
     nix flake update
+
+# Pin saturn's T3 Code server to the latest nightly release (then switch-saturn)
+bump-t3:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tag=$(gh release list -R pingdotgg/t3code -L 30 --json tagName -q '[.[] | select(.tagName | test("nightly"))][0].tagName')
+    version=${tag#v}
+    url="https://github.com/pingdotgg/t3code/releases/download/$tag/t3-$version-linux-x64.tar.gz"
+    hash=$(nix store prefetch-file --json "$url" | jq -r .hash)
+    f=modules/system/apps/t3code-server.nix
+    perl -pi -e "s|^  version = \".*\";|  version = \"$version\";|; s|^      hash = \".*\";|      hash = \"$hash\";|" "$f"
+    git diff --stat -- "$f"
