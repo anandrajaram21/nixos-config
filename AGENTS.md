@@ -110,7 +110,7 @@ bricks' `Used by` headers and the README layout in sync.
 | `system/apps/zoom.nix` | Any | Zoom | mercury |
 | `system/apps/1password.nix` | macOS | 1Password (cask) | mercury |
 | `system/apps/betterdisplay.nix` | macOS | BetterDisplay | mercury |
-| `system/apps/t3code-cask.nix` | macOS | T3 Code desktop app with T3 Connect (official cask, updates itself) | mercury |
+| `system/apps/t3code-cask.nix` | macOS | T3 Code Nightly desktop app with T3 Connect (official `t3-code@nightly` cask, updates itself) | mercury |
 | `system/apps/cmux.nix` | macOS | cmux | mercury |
 | `system/apps/ghostty.nix` | macOS | Ghostty (`ghostty-bin`; nixpkgs `ghostty` is Linux-only) | mercury |
 | `system/apps/grok-bot.nix` | macOS | Grok Bot (cask) | mercury |
